@@ -40,6 +40,6 @@ docker compose up --build
 ## Estado del Proyecto
 
 - [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
-- [ ] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
+- [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
 - [ ] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic**.
 - [ ] Fase 4: Pruebas Unitarias con Mocks e integración continua (CI).
