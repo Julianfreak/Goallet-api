@@ -6,4 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: goallet_api_core
+    ports:
+      - "7077:8080"
     restart: unless-stopped
