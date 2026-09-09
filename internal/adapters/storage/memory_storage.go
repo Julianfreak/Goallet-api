@@ -95,3 +95,30 @@ func (m *MemoryTransaccionStorage) ListarPorCuentaID(cuentaID string) ([]domain.
 
 	return resultado, nil
 }
+
+// Listar todas las cuentas registradas (Lectura segura)
+func (m *MemoryCuentaStorage) Listar() ([]*domain.Cuenta, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	cuentas := make([]*domain.Cuenta, 0, len(m.cuentas))
+	for _, cuenta := range m.cuentas {
+		cuentas = append(cuentas, cuenta)
+	}
+
+	return cuentas, nil
+}
+
+// Eliminar una cuenta por su ID (Escritura exclusiva segura)
+func (m *MemoryCuentaStorage) Eliminar(id string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, existe := m.cuentas[id]; !existe {
+		return domain.ErrCuentaNoEncontrada
+	}
+
+	// delete es la función nativa de Go para borrar una clave de un map
+	delete(m.cuentas, id)
+	return nil
+}

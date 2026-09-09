@@ -168,3 +168,32 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 
 	return transaccion, nil
 }
+func (s *billeteraService) ListarCuentas() ([]*domain.Cuenta, error) {
+	return s.cuentaRepo.Listar()
+}
+
+func (s *billeteraService) ActualizarTitular(id string, nuevoTitular string) (*domain.Cuenta, error) {
+	if nuevoTitular == "" {
+		return nil, errors.New("el nuevo titular no puede estar vacío")
+	}
+	cuenta, err := s.cuentaRepo.BuscarPorID(id)
+	if err != nil {
+		return nil, err
+	}
+	cuenta.Titular = nuevoTitular
+	if err := s.cuentaRepo.Actualizar(cuenta); err != nil {
+		return nil, err
+	}
+	return cuenta, nil
+}
+
+func (s *billeteraService) EliminarCuenta(id string) error {
+	cuenta, err := s.cuentaRepo.BuscarPorID(id)
+	if cuenta.Saldo > 0 {
+		return domain.ErrCuentaConSaldo
+	}
+	if cuenta.Saldo == 0 {
+		return s.cuentaRepo.Eliminar(id)
+	}
+	return err
+}

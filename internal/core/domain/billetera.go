@@ -11,6 +11,7 @@ var (
 	ErrMontoInvalido      = errors.New("el monto debe ser mayor a cero")
 	ErrCuentaNoEncontrada = errors.New("la cuenta especificada no existe")
 	ErrMismaCuentaDestino = errors.New("no es posible transferir a la misma cuenta de origen")
+	ErrCuentaConSaldo     = errors.New("no se puede eliminar una cuenta con saldo positivo")
 )
 
 // TipoTransaccion define si el movimiento es crédito o débito

@@ -27,6 +27,9 @@ type TransferirRequest struct {
 	CuentaDestinoID string  `json:"cuenta_destino_id" binding:"required"`
 	Monto           float64 `json:"monto" binding:"required"`
 }
+type ActualizarTitularRequest struct {
+	NuevoTitular string `json:"nuevo_titular" binding:"required"`
+}
 
 // ==========================================
 // ESTRUCTURA DEL HANDLER
@@ -159,4 +162,60 @@ func (h *BilleteraHandler) Transferir(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transaccion)
+}
+
+// GET /api/v1/cuentas
+func (h *BilleteraHandler) ListarCuentas(c *gin.Context) {
+	cuentas, err := h.service.ListarCuentas()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, cuentas)
+}
+
+// PUT /api/v1/cuentas/:id
+func (h *BilleteraHandler) ActualizarTitular(c *gin.Context) {
+	id := c.Param("id")
+
+	var req ActualizarTitularRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "el campo nuevo_titular es obligatorio"})
+		return
+	}
+
+	cuentaActualizada, err := h.service.ActualizarTitular(id, req.NuevoTitular)
+	if err != nil {
+		if errors.Is(err, domain.ErrCuentaNoEncontrada) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, cuentaActualizada)
+}
+
+// DELETE /api/v1/cuentas/:id
+func (h *BilleteraHandler) EliminarCuenta(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.service.EliminarCuenta(id)
+	if err != nil {
+		if errors.Is(err, domain.ErrCuentaNoEncontrada) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		// Si la cuenta tiene saldo > 0, retornamos 400 Bad Request
+		if errors.Is(err, domain.ErrCuentaConSaldo) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"mensaje": "cuenta eliminada exitosamente"})
 }

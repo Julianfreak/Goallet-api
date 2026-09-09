@@ -14,6 +14,8 @@ type CuentaRepository interface {
 	Guardar(cuenta *domain.Cuenta) error
 	BuscarPorID(id string) (*domain.Cuenta, error)
 	Actualizar(cuenta *domain.Cuenta) error
+	Listar() ([]*domain.Cuenta, error)
+	Eliminar(id string) error
 }
 
 // TransaccionRepository define el guardado y auditoría de movimientos
@@ -31,6 +33,9 @@ type TransaccionRepository interface {
 type BilleteraService interface {
 	CrearCuenta(titular string, saldoInicial float64) (*domain.Cuenta, error)
 	ConsultarCuenta(id string) (*domain.Cuenta, error)
+	ListarCuentas() ([]*domain.Cuenta, error)
+	ActualizarTitular(id string, nuevoTitular string) (*domain.Cuenta, error)
+	EliminarCuenta(id string) error
 	Transferir(origenID, destinoID string, monto float64) (*domain.Transaccion, error)
 	Depositar(cuentaID string, monto float64) (*domain.Transaccion, error)
 	Retirar(cuentaID string, monto float64) (*domain.Transaccion, error)

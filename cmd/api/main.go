@@ -27,11 +27,14 @@ func main() {
 	// 5. Mapeamos las rutas de la API REST
 	api := router.Group("/api/v1")
 	{
-		// Cuentas
-		api.POST("/cuentas", billeteraHandler.CrearCuenta)
-		api.GET("/cuentas/:id", billeteraHandler.ConsultarCuenta)
+		// --- CRUD DE CUENTAS ---
+		api.POST("/cuentas", billeteraHandler.CrearCuenta)          // Create
+		api.GET("/cuentas", billeteraHandler.ListarCuentas)         // Read (todas)
+		api.GET("/cuentas/:id", billeteraHandler.ConsultarCuenta)   // Read (por ID)
+		api.PUT("/cuentas/:id", billeteraHandler.ActualizarTitular) // Update (solo titular)
+		api.DELETE("/cuentas/:id", billeteraHandler.EliminarCuenta) // Delete (solo si saldo == 0)
 
-		// Operaciones Transaccionales
+		// --- OPERACIONES TRANSACCIONALES ---
 		api.POST("/cuentas/:id/depositar", billeteraHandler.Depositar)
 		api.POST("/cuentas/:id/retirar", billeteraHandler.Retirar)
 		api.POST("/cuentas/:id/transferir", billeteraHandler.Transferir)
