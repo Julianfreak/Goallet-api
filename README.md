@@ -1,6 +1,6 @@
 # Goallet API - Motor Transaccional de Billetera Digital
 
-Motor transaccional para billetera digital de alto rendimiento desarrollado en **Go (Golang)**, diseñado bajo los principios de **Arquitectura Hexagonal (Ports and Adapters)** y **Clean Code**.
+Motor transaccional para billetera digital de alto rendimiento desarrollado en **Go (Golang)**, diseñado bajo los principios de **Arquitectura Hexagonal (Ports and Adapters)** , **Clean Code** y **Testing Automatizado**.
 
 ---
 
@@ -24,6 +24,7 @@ El sistema aísla completamente la lógica del negocio de los frameworks web y m
 * **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD) básico.
 * **Concurrencia Segura:** Uso de `sync.RWMutex` para permitir lecturas masivas concurrentes y escrituras exclusivas sin condiciones de carrera.
 * **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera (< 15MB) basada en Alpine Linux.
+* **Testing:** Pruebas unitarias mediante Mocks e interfaces implícitas (testing nativo) con enfoque Table-Driven Tests y alta cobertura.
 
 ---
 
@@ -41,6 +42,13 @@ docker compose up --build
 El servicio quedará disponible en: `http://localhost:7077`
 
 ---
+
+## Pruebas Automatizadas y Covertura
+### Para ejecutar la suite completa de pruebas unitarias sobre los casos de uso ejecuta:
+
+```bash
+go test -v -cover ./internal/core/services/...
+```
 
 ## Endpoints de la API (v1)
 
@@ -62,4 +70,4 @@ El servicio quedará disponible en: `http://localhost:7077`
 - [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
 - [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
 - [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
-- [ ] Fase 4: Pruebas Unitarias con Mocks e integración continua (CI).
+- [x] Fase 4: Pruebas Unitarias con Mocks e integración continua (CI).
