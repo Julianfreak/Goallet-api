@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   wallet-api:
     build:
@@ -9,3 +7,66 @@ services:
     ports:
       - "7077:8080"
     restart: "no"
+
+  # --- PROMETHEUS (Almacenamiento de métricas) ---
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: goallet-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
+      - '--enable-feature=otlp-write-receive'
+    ports:
+      - '9090:9090'
+    networks:
+      - monitoring
+
+  # --- LOKI (Almacenamiento e indexación de logs) ---
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: goallet-loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - '3100:3100'
+    networks:
+      - monitoring
+
+  # --- GRAFANA (Visualización de tableros y paneles) ---
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: goallet-grafana
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+      - loki
+
+  # --- ALLOY (Agente unificado de telemetría) ---
+  alloy:
+    image: grafana/alloy:v1.2.1
+    container_name: goallet-alloy
+    ports:
+      - '12345:12345'
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy:ro
+      - ./app.log:/var/log/app.log:ro
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/alloy/config.alloy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+      - loki
+
+networks:
+  monitoring:
+    driver: bridge

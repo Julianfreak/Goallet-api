@@ -24,9 +24,11 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 * **Framework Web:** Gin Gonic v1.10+
 * **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD) básico.
 * **Concurrencia Segura:** Uso de `sync.RWMutex` para permitir lecturas masivas concurrentes y escrituras exclusivas sin condiciones de carrera.
-* **Logs Estructurados (JSON):** Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
+* **Logs Estructurados (JSON):** Logs Estructurados (JSON): Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
 * **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
+* **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
 * **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera basada en Alpine Linux.
+
 
 ---
 
@@ -36,6 +38,7 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 | --- | --- | --- |
 | **API REST (Gin)** | `http://localhost:8080/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
 | **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
+| **Tableros (Grafana)** |	`http://localhost:3000`	Visualización centralizada de logs y métricas |
 
 ---
 
@@ -67,7 +70,7 @@ go test -v -cover ./internal/core/services/...
 * [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
 * [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
 * [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
-* [ ] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
+* [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
 * [ ] Fase 6: Pruebas Unitarias con Mocks e integración continua (CI).
 
 ```

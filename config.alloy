@@ -1,0 +1,43 @@
+// 1. RECOLECCIÓN DE MÉTRICAS (Prometheus Scraping)
+prometheus.scrape "goallet_metrics" {
+  targets = [
+    {
+      "__address__" = "host.docker.internal:2112",
+      "job"         = "goallet-api",
+    },
+  ]
+  forward_to      = [prometheus.remote_write.local_prom.receiver]
+  scrape_interval = "5s"
+  scrape_timeout  = "4s"
+}
+
+// 2. ENVÍO DE MÉTRICAS A PROMETHEUS
+prometheus.remote_write "local_prom" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// 3. CAPTURA DE LOGS ESTRUCTURADOS (Loki File Matcher)
+local.file_match "goallet_logs" {
+  path_targets = [
+    {
+      "__path__" = "/var/log/app.log",
+      "job"      = "goallet-api",
+      "app"      = "goallet-api",
+    },
+  ]
+}
+
+// 4. LECTURA Y PROCESAMIENTO DE ARCHIVOS DE LOG
+loki.source.file "goallet_logs" {
+  targets    = local.file_match.goallet_logs.targets
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+// 5. ENVÍO DE LOGS A LOKI
+loki.write "local_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
