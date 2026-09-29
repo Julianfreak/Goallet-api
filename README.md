@@ -1,51 +1,48 @@
 # Goallet API - Motor Transaccional de Billetera Digital
 
-Motor transaccional para billetera digital de alto rendimiento desarrollado en **Go (Golang)**, diseñado bajo los principios de **Arquitectura Hexagonal (Ports and Adapters)** y **Clean Code**.
+Motor transaccional para billetera digital de alto rendimiento desarrollado en **Go (Golang)**, diseñado bajo los principios de **Arquitectura Hexagonal (Ports and Adapters)**, **Clean Code** y **Observabilidad Nativa**.
+
 
 ---
 
 ## Arquitectura del Proyecto
 
-El sistema aísla completamente la lógica del negocio de los frameworks web y mecanismos de persistencia:
+El sistema aísla completamente la lógica del negocio de los frameworks web, mecanismos de persistencia y herramientas de telemetría:
 
 * **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación).
 * **internal/core/ports:** Interfaces que definen los contratos para repositorios (salida) y casos de uso (entrada).
 * **internal/core/services:** Orquestación y casos de uso (CRUD de cuentas, Depósitos, Retiros y Transferencias seguras).
-* **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic**.
+* **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic** y middlewares de registro estructurado.
 * **internal/adapters/storage:** Adaptador de persistencia en memoria con control de concurrencia mediante `sync.RWMutex`.
-* **cmd/api:** Punto de arranque e inicialización (Composition Root).
+* **cmd/api:** Punto de arranque e inicialización (Composition Root) y servidor de métricas secundario.
 
 ---
 
-## Características Técnicas
+## Características Técnicas y Observabilidad
 
 * **Lenguaje:** Go 1.23+
 * **Framework Web:** Gin Gonic v1.10+
 * **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD) básico.
 * **Concurrencia Segura:** Uso de `sync.RWMutex` para permitir lecturas masivas concurrentes y escrituras exclusivas sin condiciones de carrera.
-* **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera (< 15MB) basada en Alpine Linux.
+* **Logs Estructurados (JSON):** Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
+* **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
+* **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera basada en Alpine Linux.
 
 ---
 
-## Cómo ejecutar el proyecto
+## Servicios y Puertos Expuestos
 
-### Prerrequisitos
-* Tener instalado Docker y Docker Compose.
-
-### Ejecución con un solo comando
-
-```bash
-docker compose up --build
-```
-
-El servicio quedará disponible en: `http://localhost:7077`
+| Servicio | Puerto / Ruta | Descripción |
+| --- | --- | --- |
+| **API REST (Gin)** | `http://localhost:8080/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
+| **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
 
 ---
 
 ## Endpoints de la API (v1)
 
 | Método | Endpoint | Descripción |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **POST** | `/api/v1/cuentas` | Crea una nueva cuenta bancaria |
 | **GET** | `/api/v1/cuentas` | Lista todas las cuentas registradas |
 | **GET** | `/api/v1/cuentas/:id` | Consulta los detalles y saldo de una cuenta por ID |
@@ -59,7 +56,13 @@ El servicio quedará disponible en: `http://localhost:7077`
 
 ## Estado del Proyecto
 
-- [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
-- [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
-- [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
-- [ ] Fase 4: Pruebas Unitarias con Mocks e integración continua (CI).
+* [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
+* [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
+* [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
+* [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
+* [ ] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
+* [ ] Fase 6: Pruebas Unitarias con Mocks e integración continua (CI).
+
+```
+
+```

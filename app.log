@@ -1,0 +1,2 @@
+{"time":"2026-09-28T20:03:13.753783194-05:00","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-09-28T20:03:13.753793383-05:00","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
