@@ -39,6 +39,13 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 ---
 
+## Pruebas Automatizadas y Covertura
+### Para ejecutar la suite completa de pruebas unitarias sobre los casos de uso ejecuta:
+
+```bash
+go test -v -cover ./internal/core/services/...
+```
+
 ## Endpoints de la API (v1)
 
 | Método | Endpoint | Descripción |
