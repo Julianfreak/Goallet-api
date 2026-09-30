@@ -75,7 +75,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "loki-ds"
       },
       "gridPos": {
         "h": 8,
@@ -98,7 +98,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "loki-ds"
           },
           "editorMode": "code",
           "expr": "{filename=\"/var/log/app.log\"}",
@@ -112,7 +112,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -191,7 +191,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus-ds"
           },
           "editorMode": "code",
           "expr": "rate(process_cpu_seconds_total[1m]) * 100",
@@ -207,7 +207,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -286,7 +286,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus-ds"
           },
           "editorMode": "code",
           "expr": "process_resident_memory_bytes / (1024 * 1024)",
@@ -302,7 +302,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -381,7 +381,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus-ds"
           },
           "editorMode": "code",
           "expr": "go_goroutines",

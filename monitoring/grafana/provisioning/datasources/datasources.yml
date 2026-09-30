@@ -7,9 +7,11 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: true
+    uid: prometheus-ds
 
   - name: Loki
     type: loki
     access: proxy
     url: http://loki:3100
     editable: true
+    uid: loki-ds
