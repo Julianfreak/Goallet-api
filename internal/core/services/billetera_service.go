@@ -186,14 +186,14 @@ func (s *billeteraService) ActualizarTitular(id string, nuevoTitular string) (*d
 	}
 	return cuenta, nil
 }
-
 func (s *billeteraService) EliminarCuenta(id string) error {
 	cuenta, err := s.cuentaRepo.BuscarPorID(id)
+	if err != nil {
+		return err
+	}
+
 	if cuenta.Saldo > 0 {
 		return domain.ErrCuentaConSaldo
 	}
-	if cuenta.Saldo == 0 {
-		return s.cuentaRepo.Eliminar(id)
-	}
-	return err
+	return s.cuentaRepo.Eliminar(id)
 }
