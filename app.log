@@ -4,3 +4,12 @@
 {"time":"2026-09-29T17:38:48.552256439-05:00","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
 {"time":"2026-09-29T17:56:33.936074802-05:00","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
 {"time":"2026-09-29T17:56:33.936136811-05:00","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-09-30T22:03:51.453475742Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-09-30T22:03:51.453630919Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-09-30T22:04:13.906948282Z","level":"INFO","msg":"Petición HTTP procesada","status":201,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":251995}
+{"time":"2026-09-30T22:04:28.482553738Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":35719}
+{"time":"2026-09-30T22:04:40.666790203Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/api/v1/cuentas/cta-1789087849854735689","ip":"172.18.0.1","latency":23770}
+{"time":"2026-09-30T22:05:05.0270223Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas/PEGA_AQUI_EL_ID_DE_CUENTA/transferir","ip":"172.18.0.1","latency":109808}
+{"time":"2026-09-30T22:05:25.877974663Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":21410}
+{"time":"2026-09-30T22:05:41.309590324Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/cuentas/cta-1790805853906889153/retirar","ip":"172.18.0.1","latency":88398}
+{"time":"2026-09-30T22:05:53.246900367Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas/cta-1790805853906889153","ip":"172.18.0.1","latency":18590}
