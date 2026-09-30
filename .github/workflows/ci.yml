@@ -38,3 +38,33 @@ jobs:
             echo "Error: La cobertura ($COVERAGE%) es menor al umbral mínimo del 80%"
             exit 1
           fi
+          
+  build-and-verify:
+    name: Build Docker Stack & Verify
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prepare Log File Permissions
+        run: |
+          touch app.log
+          chmod 666 app.log
+
+      - name: Start Docker Compose Stack
+        env:
+          GF_ADMIN_PASSWORD: ${{ secrets.GF_ADMIN_PASSWORD }}
+          GF_ALLOW_SIGN_UP: "false"
+        run: |
+          docker compose up -d --build
+
+      - name: Verify Container Status
+        run: |
+          sleep 5
+          docker compose ps
+
+      - name: Tear Down Stack
+        if: always()
+        run: docker compose down

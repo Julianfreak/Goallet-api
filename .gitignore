@@ -16,3 +16,4 @@ goallet-api
 *.swo
 
 .DS_Store
+.env
