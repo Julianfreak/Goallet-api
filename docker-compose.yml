@@ -1,17 +1,28 @@
 services:
-  wallet-api:
+  # ==========================================================
+  # 1. APLICACIÓN PRINCIPAL: Goallet API
+  # ==========================================================
+  goallet-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: goallet_api_core
+    container_name: goallet-api
+    restart: unless-stopped
     ports:
-      - "7077:8080"
-    restart: "no"
+      - "8080:8080" # API REST
+      - "2112:2112" # Métricas Prometheus
+    volumes:
+      - ./app.log:/app/app.log # Montaje del archivo de log
+    networks:
+      - monitoring
 
-  # --- PROMETHEUS (Almacenamiento de métricas) ---
+  # ==========================================================
+  # 2. PROMETHEUS (Métricas)
+  # ==========================================================
   prometheus:
     image: prom/prometheus:v2.54.0
     container_name: goallet-prometheus
+    restart: unless-stopped
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-remote-write-receiver'
@@ -21,20 +32,26 @@ services:
     networks:
       - monitoring
 
-  # --- LOKI (Almacenamiento e indexación de logs) ---
+  # ==========================================================
+  # 3. LOKI (Logs)
+  # ==========================================================
   loki:
     image: grafana/loki:3.0.0
     container_name: goallet-loki
+    restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
     ports:
       - '3100:3100'
     networks:
       - monitoring
 
-  # --- GRAFANA (Visualización de tableros y paneles) ---
+  # ==========================================================
+  # 4. GRAFANA (Tableros)
+  # ==========================================================
   grafana:
     image: grafana/grafana:11.1.0
     container_name: goallet-grafana
+    restart: unless-stopped
     ports:
       - '3000:3000'
     environment:
@@ -46,10 +63,13 @@ services:
       - prometheus
       - loki
 
-  # --- ALLOY (Agente unificado de telemetría) ---
+  # ==========================================================
+  # 5. ALLOY (Recolector de Telemetría)
+  # ==========================================================
   alloy:
     image: grafana/alloy:v1.2.1
     container_name: goallet-alloy
+    restart: unless-stopped
     ports:
       - '12345:12345'
     volumes:
@@ -64,6 +84,7 @@ services:
     networks:
       - monitoring
     depends_on:
+      - goallet-api
       - prometheus
       - loki
 

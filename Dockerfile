@@ -26,12 +26,12 @@ RUN addgroup -g 10001 -S appgroup && \
 
 WORKDIR /app
 
-# Copiar el binario asignando la propiedad directamente en el COPY
-COPY --chown=appuser:appgroup --from=builder /app/goallet-api .
+# Copiar el binario explícitamente al directorio actual
+COPY --chown=appuser:appgroup --from=builder /app/goallet-api ./goallet-api
 
 # Cambiar al usuario sin privilegios de root
 USER appuser:appgroup
 
 EXPOSE 8080 2112
 
-CMD ["app/goallet-api"]
+ENTRYPOINT ["./goallet-api"]
