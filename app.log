@@ -13,3 +13,9 @@
 {"time":"2026-09-30T22:05:25.877974663Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":21410}
 {"time":"2026-09-30T22:05:41.309590324Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/cuentas/cta-1790805853906889153/retirar","ip":"172.18.0.1","latency":88398}
 {"time":"2026-09-30T22:05:53.246900367Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas/cta-1790805853906889153","ip":"172.18.0.1","latency":18590}
+{"time":"2026-09-30T17:58:38.081535248-05:00","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-09-30T17:58:38.081597976-05:00","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-09-30T17:58:38.081763929-05:00","level":"ERROR","msg":"Error iniciando servidor de métricas Prometheus","error":"listen tcp :2112: bind: address already in use"}
+{"time":"2026-09-30T17:58:38.081767519-05:00","level":"ERROR","msg":"Error al iniciar el servidor Gin","error":"listen tcp :8080: bind: address already in use"}
+{"time":"2026-09-30T23:09:09.002039604Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-09-30T23:09:09.002264746Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}

@@ -46,7 +46,7 @@ services:
       - monitoring
 
   # ==========================================================
-  # 4. GRAFANA (Tableros)
+  # 4. GRAFANA (Visualización)
   # ==========================================================
   grafana:
     image: grafana/grafana:11.1.0
@@ -59,6 +59,8 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - monitoring
     depends_on:
