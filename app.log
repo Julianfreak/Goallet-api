@@ -23,3 +23,15 @@
 {"time":"2026-09-30T18:27:56.951254634-05:00","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
 {"time":"2026-09-30T18:27:56.95144492-05:00","level":"ERROR","msg":"Error iniciando servidor de métricas Prometheus","error":"listen tcp :2112: bind: address already in use"}
 {"time":"2026-09-30T18:27:56.951520898-05:00","level":"ERROR","msg":"Error al iniciar el servidor Gin","error":"listen tcp :8080: bind: address already in use"}
+{"time":"2026-09-30T23:54:47.284870464Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-09-30T23:54:47.284949084Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-02T19:43:29.433296302Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-02T19:43:29.433317622Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-02T19:44:43.660925671Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":214394}
+{"time":"2026-10-02T19:44:43.677863547Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":291812}
+{"time":"2026-10-02T19:44:43.680533445Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":19319}
+{"time":"2026-10-02T19:44:43.681489529Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":791139}
+{"time":"2026-10-02T19:44:43.682423304Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":29869}
+{"time":"2026-10-02T19:44:43.682824083Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":481527}
+{"time":"2026-10-02T19:44:43.833955029Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":221684}
+{"time":"2026-10-02T19:44:43.877040583Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":36209}

@@ -1,0 +1,532 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Motor backend transaccional para billetera digital de alta concurrencia.",
+        "title": "Goallet API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Julian Serna Saavedra",
+            "url": "https://github.com/Julianfreak/Goallet-api"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/cuentas": {
+            "get": {
+                "description": "Obtiene el listado completo de cuentas registradas en el sistema",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cuentas"
+                ],
+                "summary": "Listar todas las cuentas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Registra un titular y asigna un saldo inicial opcional",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cuentas"
+                ],
+                "summary": "Crear nueva cuenta bancaria",
+                "parameters": [
+                    {
+                        "description": "Datos de apertura de cuenta",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                        }
+                    },
+                    "400": {
+                        "description": "Formato de datos inválido o titular ausente",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cuentas/{id}": {
+            "get": {
+                "description": "Obtiene la información detallada de una cuenta existente",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cuentas"
+                ],
+                "summary": "Consultar cuenta por ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Modifica el nombre del titular asociado a una cuenta",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cuentas"
+                ],
+                "summary": "Actualizar el titular de una cuenta",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Nuevo nombre del titular",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                        }
+                    },
+                    "400": {
+                        "description": "Petición inválida",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Elimina una cuenta existente únicamente si su saldo es igual a 0",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cuentas"
+                ],
+                "summary": "Eliminar una cuenta",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cuenta eliminada exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.MensajeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "La cuenta tiene saldo pendiente",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cuentas/{id}/depositar": {
+            "post": {
+                "description": "Incrementa el saldo de una cuenta con un monto positivo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transacciones"
+                ],
+                "summary": "Realizar un depósito",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Monto a depositar",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                        }
+                    },
+                    "400": {
+                        "description": "Monto inválido o cuerpo de petición incorrecto",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cuentas/{id}/retirar": {
+            "post": {
+                "description": "Deduce un monto de una cuenta si dispone de saldo suficiente",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transacciones"
+                ],
+                "summary": "Realizar un retiro",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Monto a retirar",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                        }
+                    },
+                    "400": {
+                        "description": "Monto inválido o saldo insuficiente",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cuentas/{id}/transferir": {
+            "post": {
+                "description": "Realiza una transferencia desde la cuenta origen hacia la cuenta de destino",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transacciones"
+                ],
+                "summary": "Transferir fondos entre cuentas",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la cuenta origen",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos de la transferencia",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.TransferirRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                        }
+                    },
+                    "400": {
+                        "description": "Datos inválidos, saldo insuficiente o misma cuenta",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta no encontrada",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest": {
+            "type": "object",
+            "required": [
+                "nuevo_titular"
+            ],
+            "properties": {
+                "nuevo_titular": {
+                    "type": "string"
+                }
+            }
+        },
+        "goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest": {
+            "type": "object",
+            "required": [
+                "titular"
+            ],
+            "properties": {
+                "saldo_inicial": {
+                    "type": "number"
+                },
+                "titular": {
+                    "type": "string"
+                }
+            }
+        },
+        "goallet-api_internal_adapters_handlers_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "mensaje de error explicativo"
+                }
+            }
+        },
+        "goallet-api_internal_adapters_handlers_dto.MensajeResponse": {
+            "type": "object",
+            "properties": {
+                "mensaje": {
+                    "type": "string",
+                    "example": "operación realizada exitosamente"
+                }
+            }
+        },
+        "goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest": {
+            "type": "object",
+            "required": [
+                "monto"
+            ],
+            "properties": {
+                "monto": {
+                    "type": "number"
+                }
+            }
+        },
+        "goallet-api_internal_adapters_handlers_dto.TransferirRequest": {
+            "type": "object",
+            "required": [
+                "cuenta_destino_id",
+                "monto"
+            ],
+            "properties": {
+                "cuenta_destino_id": {
+                    "type": "string"
+                },
+                "monto": {
+                    "type": "number"
+                }
+            }
+        },
+        "goallet-api_internal_core_domain.Cuenta": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "saldo": {
+                    "type": "number"
+                },
+                "titular": {
+                    "type": "string"
+                }
+            }
+        },
+        "goallet-api_internal_core_domain.TipoTransaccion": {
+            "type": "string",
+            "enum": [
+                "DEPOSITO",
+                "RETIRO",
+                "TRANSFERENCIA"
+            ],
+            "x-enum-varnames": [
+                "Deposito",
+                "Retiro",
+                "Transferencia"
+            ]
+        },
+        "goallet-api_internal_core_domain.Transaccion": {
+            "type": "object",
+            "properties": {
+                "cuenta_destino_id": {
+                    "type": "string"
+                },
+                "cuenta_origen_id": {
+                    "type": "string"
+                },
+                "fecha": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "monto": {
+                    "type": "number"
+                },
+                "tipo": {
+                    "$ref": "#/definitions/goallet-api_internal_core_domain.TipoTransaccion"
+                }
+            }
+        }
+    }
+}

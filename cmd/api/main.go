@@ -9,13 +9,31 @@ import (
 	"os"
 	"time"
 
+	_ "goallet-api/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"goallet-api/internal/adapters/handlers"
 	"goallet-api/internal/adapters/storage"
 	"goallet-api/internal/core/services"
 )
+
+// @title           Goallet API
+// @version         1.0
+// @description     Motor backend transaccional para billetera digital de alta concurrencia.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Julian Serna Saavedra
+// @contact.url    https://github.com/Julianfreak/Goallet-api
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
 
 func main() {
 	fmt.Println("==========================================================")
@@ -56,6 +74,9 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())         // Captura panics de forma segura
 	router.Use(jsonLoggerMiddleware()) // Middleware de registro estructurado JSON
+
+	// --- RUTA INTERACTIVA SWAGGER UI ---
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 7. Mapeamos las rutas de la API REST
 	api := router.Group("/api/v1")

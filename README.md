@@ -32,6 +32,18 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 ---
 
+## Documentación Interactiva (OpenAPI / Swagger)
+
+La API dispone de especificación OpenAPI 3.0 accesible desde la interfaz de Swagger UI cuando el servidor está en ejecución:
+
+* **URL de Swagger UI:** `http://localhost:8080/swagger/index.html`
+
+### Regenerar la documentación
+Si modificas DTOs, comentarios u operaciones en los handlers, regenera los artefactos OpenAPI ejecutando:
+
+```bash
+swag init -g cmd/api/main.go --parseDependency --parseInternal
+
 ## Servicios y Puertos Expuestos
 
 | Servicio | Puerto / Ruta | Descripción |
