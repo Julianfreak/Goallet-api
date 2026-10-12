@@ -92,8 +92,26 @@ services:
       - prometheus
       - loki
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: goallet_postgres
+    environment:
+      POSTGRES_USER: goallet_user
+      POSTGRES_PASSWORD: goallet_password
+      POSTGRES_DB: goallet_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goallet_user -d goallet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 networks:
   monitoring:
     driver: bridge
 volumes:
   grafana-data:
+  postgres_data:

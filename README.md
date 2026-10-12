@@ -23,12 +23,12 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 * **Lenguaje:** Go 1.23+
 * **Framework Web:** Gin Gonic v1.10+
 * **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD) básico.
+- **Consistencia ACID y Concurrencia Segura:** Uso de transacciones explícitas con **bloqueos a nivel de fila (`SELECT ... FOR UPDATE`)** para prevenir condiciones de carrera (*race conditions*) y dobles gastos bajo alta concurrencia.
 * **Concurrencia Segura:** Uso de `sync.RWMutex` para permitir lecturas masivas concurrentes y escrituras exclusivas sin condiciones de carrera.
 * **Logs Estructurados (JSON):** Logs Estructurados (JSON): Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
 * **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
 * **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
 * **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera basada en Alpine Linux.
-
 
 ---
 
@@ -49,10 +49,12 @@ swag init -g cmd/api/main.go --parseDependency --parseInternal
 | Servicio | Puerto / Ruta | Descripción |
 | --- | --- | --- |
 | **API REST (Gin)** | `http://localhost:8080/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
+| **Base de Datos (Postgres)** | `http://localhost:5432` | Motor relacional con persitencia transaccional ACID |
 | **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
 | **Tableros (Grafana)** |	`http://localhost:3000`	Visualización centralizada de logs y métricas |
 
 ---
+
 
 ## Pruebas Automatizadas y Covertura
 ### Para ejecutar la suite completa de pruebas unitarias sobre los casos de uso ejecuta:
@@ -76,6 +78,7 @@ go test -v -cover ./internal/core/services/...
 
 ---
 
+
 ## Estado del Proyecto
 
 * [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
@@ -84,6 +87,7 @@ go test -v -cover ./internal/core/services/...
 * [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
 * [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
 * [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
+* [x] Fase 7: Migración a PostgreSQL con pgxpool, transacciones ACID y bloqueos de fila (SELECT ... FOR UPDATE) para alta concurrencia.
 
 ```
 

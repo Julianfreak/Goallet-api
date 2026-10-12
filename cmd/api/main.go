@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,7 @@ import (
 	_ "goallet-api/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -40,6 +42,8 @@ func main() {
 	fmt.Println("   Goallet API - Motor Transaccional de Billetera Digital  ")
 	fmt.Println("==========================================================")
 
+	ctx := context.Background()
+
 	// 1. Configuración de Logs JSON (slog) hacia Consola y app.log
 	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -60,11 +64,37 @@ func main() {
 		}
 	}()
 
-	// 3. Instanciamos los adaptadores de salida (Persistencia)
-	cuentaRepo := storage.NewMemoryCuentaStorage()
-	transaccionRepo := storage.NewMemoryTransaccionStorage()
+	// 3. Configuración y Conexión al Pool de PostgreSQL (pgxpool)
+	dbHost := getEnv("DB_HOST", "localhost")
+	dbPort := getEnv("DB_PORT", "5432")
+	dbUser := getEnv("DB_USER", "goallet_user")
+	dbPassword := getEnv("DB_PASSWORD", "goallet_password")
+	dbName := getEnv("DB_NAME", "goallet_db")
+	dbSSLMode := getEnv("DB_SSLMODE", "disable")
 
-	// 4. Inyectamos los repositorios en el Servicio (Núcleo)
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode,
+	)
+
+	dbPool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		slog.Error("Error crítico al crear el pool de conexiones a PostgreSQL", "error", err)
+		os.Exit(1)
+	}
+	defer dbPool.Close()
+
+	if err := dbPool.Ping(ctx); err != nil {
+		slog.Error("No se pudo establecer conexión con PostgreSQL (Ping fallido)", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("Conexión exitosa y verificada con PostgreSQL (pgxpool)")
+
+	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
+	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)
+	transaccionRepo := storage.NewPostgresTransaccionStorage(dbPool)
+
+	// Inyectamos ambos repositorios en el Servicio (Núcleo)
 	billeteraService := services.NewBilleteraService(cuentaRepo, transaccionRepo)
 
 	// 5. Inyectamos el servicio en el Adaptador de entrada (Handler HTTP)
@@ -100,6 +130,14 @@ func main() {
 		slog.Error("Error al iniciar el servidor Gin", "error", err)
 		os.Exit(1)
 	}
+}
+
+// Helper para leer variables de entorno con valor por defecto
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
 }
 
 // jsonLoggerMiddleware intercepta cada HTTP request de Gin y emite un log JSON con slog.
