@@ -2,33 +2,33 @@
 
 Motor transaccional para billetera digital de alto rendimiento desarrollado en **Go (Golang)**, diseñado bajo los principios de **Arquitectura Hexagonal (Ports and Adapters)**, **Clean Code** y **Observabilidad Nativa**.
 
-
 ---
 
 ## Arquitectura del Proyecto
 
 El sistema aísla completamente la lógica del negocio de los frameworks web, mecanismos de persistencia y herramientas de telemetría:
 
-* **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación).
-* **internal/core/ports:** Interfaces que definen los contratos para repositorios (salida) y casos de uso (entrada).
-* **internal/core/services:** Orquestación y casos de uso (CRUD de cuentas, Depósitos, Retiros y Transferencias seguras).
-* **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic** y middlewares de registro estructurado.
-* **internal/adapters/storage:** Adaptador de persistencia en memoria con control de concurrencia mediante `sync.RWMutex`.
-* **cmd/api:** Punto de arranque e inicialización (Composition Root) y servidor de métricas secundario.
+- **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación).
+- **internal/core/ports:** Interfaces que definen los contratos para repositorios (salida) y casos de uso (entrada).
+- **internal/core/services:** Orquestación y casos de uso (CRUD de cuentas, Depósitos, Retiros y Transferencias seguras).
+- **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic** y middlewares de registro estructurado.
+- **internal/adapters/storage:** Adaptadores de persistencia relacional con **PostgreSQL (`pgxpool`)**, incorporando control de concurrencia transaccional mediante bloqueos exclusivos.
+- **cmd/api:** Punto de arranque e inicialización (Composition Root), servidor de métricas secundario y gestión del ciclo de vida de la conexión a base de datos.
 
 ---
 
 ## Características Técnicas y Observabilidad
 
-* **Lenguaje:** Go 1.23+
-* **Framework Web:** Gin Gonic v1.10+
-* **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD) básico.
+- **Lenguaje:** Go 1.23+
+- **Framework Web:** Gin Gonic v1.10+
+- **Base de Datos:** PostgreSQL 16+ con driver de alto rendimiento `pgx/v5`.
+- **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD).
 - **Consistencia ACID y Concurrencia Segura:** Uso de transacciones explícitas con **bloqueos a nivel de fila (`SELECT ... FOR UPDATE`)** para prevenir condiciones de carrera (*race conditions*) y dobles gastos bajo alta concurrencia.
-* **Concurrencia Segura:** Uso de `sync.RWMutex` para permitir lecturas masivas concurrentes y escrituras exclusivas sin condiciones de carrera.
-* **Logs Estructurados (JSON):** Logs Estructurados (JSON): Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
-* **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
-* **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
-* **Contenedorización:** Construcción multietapa (*Multi-stage build*) en Docker con imagen final ultraligera basada en Alpine Linux.
+- **Precisión Financiera:** Almacenamiento monetario estricto mediante tipos `NUMERIC(15,2)`.
+- **Logs Estructurados (JSON):** Implementación de `slog` con salida simultánea a `stdout` y archivo persistente `app.log`.
+- **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
+- **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
+- **Contenedorización:** Soporte multi-contenedor mediante Docker Compose con paridad total entre entornos de trabajo.
 
 ---
 
@@ -36,7 +36,7 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 La API dispone de especificación OpenAPI 3.0 accesible desde la interfaz de Swagger UI cuando el servidor está en ejecución:
 
-* **URL de Swagger UI:** `http://localhost:8080/swagger/index.html`
+- **URL de Swagger UI:** `http://localhost:8090/swagger/index.html` *(o el puerto configurado en `API_PORT`)*
 
 ### Regenerar la documentación
 Si modificas DTOs, comentarios u operaciones en los handlers, regenera los artefactos OpenAPI ejecutando:

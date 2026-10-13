@@ -9,8 +9,15 @@ services:
     container_name: goallet-api
     restart: unless-stopped
     ports:
-      - "8080:8080" # API REST
+      - "${API_PORT:-8090}:8080"
       - "2112:2112" # Métricas Prometheus
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=goallet_user
+      - DB_PASSWORD=goallet_password
+      - DB_NAME=goallet_db
+      - DB_SSLMODE=disable
     volumes:
       - ./app.log:/app/app.log # Montaje del archivo de log
     networks:
@@ -108,6 +115,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - monitoring
 
 networks:
   monitoring:
