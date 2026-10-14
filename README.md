@@ -9,7 +9,7 @@ Motor transaccional para billetera digital de alto rendimiento desarrollado en *
 El sistema aísla completamente la lógica del negocio de los frameworks web, mecanismos de persistencia y herramientas de telemetría:
 
 - **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación).
-- **internal/core/ports:** Interfaces que definen los contratos para repositorios (salida) y casos de uso (entrada).
+- **internal/core/ports:** Interfaces que definen los contratos para repositorios de salida y casos de uso de entrada.
 - **internal/core/services:** Orquestación y casos de uso (CRUD de cuentas, Depósitos, Retiros y Transferencias seguras).
 - **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic** y middlewares de registro estructurado.
 - **internal/adapters/storage:** Adaptadores de persistencia relacional con **PostgreSQL (`pgxpool`)**, incorporando control de concurrencia transaccional mediante bloqueos exclusivos.
@@ -32,6 +32,33 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 ---
 
+## 🚀 Despliegue y Puesta en Marcha (Docker Compose)
+
+El stack completo se ejecuta mediante contenedores aislados que comparten una red virtual (`monitoring`):
+
+### 1. Configuración de Entorno (`.env`)
+Crea un archivo `.env` en la raíz del proyecto basándote en la siguiente configuración (ajustando `API_PORT` en caso de conflictos de puertos en tu máquina anfitriona):
+
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=goallet_user
+DB_PASSWORD=goallet_password
+DB_NAME=goallet_db
+DB_SSLMODE=disable
+PORT=8080
+API_PORT=8090
+GF_ADMIN_PASSWORD=tu_password_seguro_local
+
+### 2. Levantar el Stack Completo
+Ejecuta el siguiente comando para construir la imagen de la API y levantar todos los servicios (PostgreSQL con healthcheck, API, Prometheus, Loki, Grafana y Alloy):
+
+docker compose up --build -d
+
+### 3. Verificar el Estado de los Contenedores
+docker compose ps
+
+---
+
 ## Documentación Interactiva (OpenAPI / Swagger)
 
 La API dispone de especificación OpenAPI 3.0 accesible desde la interfaz de Swagger UI cuando el servidor está en ejecución:
@@ -41,27 +68,38 @@ La API dispone de especificación OpenAPI 3.0 accesible desde la interfaz de Swa
 ### Regenerar la documentación
 Si modificas DTOs, comentarios u operaciones en los handlers, regenera los artefactos OpenAPI ejecutando:
 
-```bash
 swag init -g cmd/api/main.go --parseDependency --parseInternal
+
+---
 
 ## Servicios y Puertos Expuestos
 
 | Servicio | Puerto / Ruta | Descripción |
 | --- | --- | --- |
-| **API REST (Gin)** | `http://localhost:8080/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
-| **Base de Datos (Postgres)** | `http://localhost:5432` | Motor relacional con persitencia transaccional ACID |
+| **API REST (Gin)** | `http://localhost:8090/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
+| **Base de Datos (Postgres)** | `localhost:5432` | Motor relacional con persistencia transaccional ACID |
 | **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
-| **Tableros (Grafana)** |	`http://localhost:3000`	Visualización centralizada de logs y métricas |
+| **Tableros (Grafana)** | `http://localhost:3000` | Visualización centralizada de logs y métricas |
 
 ---
 
+## ⚡ Pruebas de Carga y Concurrencia con k6
 
-## Pruebas Automatizadas y Covertura
-### Para ejecutar la suite completa de pruebas unitarias sobre los casos de uso ejecuta:
+Para validar el comportamiento del motor transaccional ante alta concurrencia y comprobar la seguridad de los bloqueos de fila ACID, el proyecto incluye un script automatizado en `load-test.js`.
 
-```bash
+Puedes ejecutar la prueba de estrés mediante un contenedor efímero de `k6` conectado directamente a la red interna de Docker (sin necesidad de instalar herramientas locales):
+
+docker run --rm -i --network goallet-api_monitoring -v $(pwd):/workspace grafana/k6 run /workspace/load-test.js
+
+---
+
+## Pruebas Automatizadas y Cobertura
+
+Para ejecutar la suite completa de pruebas unitarias sobre los casos de uso ejecuta:
+
 go test -v -cover ./internal/core/services/...
-```
+
+---
 
 ## Endpoints de la API (v1)
 
@@ -78,17 +116,12 @@ go test -v -cover ./internal/core/services/...
 
 ---
 
-
 ## Estado del Proyecto
 
-* [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
-* [x] Fase 2: Adaptador de Persistencia en Memoria con protección de concurrencia (`sync.RWMutex`).
-* [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
-* [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
-* [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
-* [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
-* [x] Fase 7: Migración a PostgreSQL con pgxpool, transacciones ACID y bloqueos de fila (SELECT ... FOR UPDATE) para alta concurrencia.
-
-```
-
-```
+- [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
+- [x] Fase 2: Adaptador de Persistencia en Memoria inicial (`sync.RWMutex`).
+- [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
+- [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
+- [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
+- [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
+- [x] Fase 7: Migración a PostgreSQL con `pgxpool`, transacciones ACID y bloqueos de fila (`SELECT ... FOR UPDATE`) para alta concurrencia.
