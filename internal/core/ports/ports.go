@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"context"
 	"goallet-api/internal/core/domain"
 )
 
@@ -39,4 +40,5 @@ type BilleteraService interface {
 	Transferir(origenID, destinoID string, monto float64) (*domain.Transaccion, error)
 	Depositar(cuentaID string, monto float64) (*domain.Transaccion, error)
 	Retirar(cuentaID string, monto float64) (*domain.Transaccion, error)
+	ListarMovimientosPorCuenta(ctx context.Context, cuentaID string) ([]domain.Movimiento, error)
 }

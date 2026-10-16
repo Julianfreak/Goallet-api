@@ -271,3 +271,23 @@ func (h *BilleteraHandler) EliminarCuenta(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"mensaje": "cuenta eliminada exitosamente"})
 }
+
+// ConsultarMovimientos godoc
+// @Summary      Consultar historial de transacciones (Ledger)
+// @Description  Retorna la lista de todos los movimientos y auditoría de una cuenta específica
+// @Tags         Movimientos
+// @Produce      json
+// @Param        id   path      string  true  "ID de la Cuenta (UUID)"
+// @Success      200  {array}   domain.Movimiento
+// @Router       /api/v1/cuentas/{id}/movimientos [get]
+func (h *BilleteraHandler) ConsultarMovimientos(c *gin.Context) {
+	cuentaID := c.Param("id")
+
+	movimientos, err := h.service.ListarMovimientosPorCuenta(c.Request.Context(), cuentaID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, movimientos)
+}

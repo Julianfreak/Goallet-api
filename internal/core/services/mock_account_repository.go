@@ -7,6 +7,10 @@ import (
 )
 
 // MockAccountRepository simula el puerto de persistencia
+
+type MockMovimientoRepo struct {
+	mock.Mock
+}
 type MockAccountRepository struct {
 	mock.Mock
 }

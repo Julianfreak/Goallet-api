@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -103,8 +104,9 @@ func setupTestRouter(repoCuenta *MockCuentaRepo, mockTx *MockTxRepo) *gin.Engine
 	if mockTx == nil {
 		mockTx = &MockTxRepo{}
 	}
+	mockMovimiento := &MockMovimientoRepo{}
 
-	service := services.NewBilleteraService(repoCuenta, mockTx)
+	service := services.NewBilleteraService(repoCuenta, mockTx, mockMovimiento)
 	handler := handlers.NewBilleteraHandler(service)
 
 	router := gin.New()
@@ -460,4 +462,14 @@ func TestHandler_EliminarCuenta(t *testing.T) {
 			t.Errorf("Esperado 500, obtenido %d", w.Code)
 		}
 	})
+}
+
+type MockMovimientoRepo struct{}
+
+func (m *MockMovimientoRepo) Registrar(ctx context.Context, tx interface{}, mov *domain.Movimiento) error {
+	return nil
+}
+
+func (m *MockMovimientoRepo) ObtenerPorCuentaID(ctx context.Context, cuentaID string) ([]domain.Movimiento, error) {
+	return []domain.Movimiento{}, nil
 }

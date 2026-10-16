@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"goallet-api/internal/core/domain"
@@ -13,14 +14,16 @@ import (
 type billeteraService struct {
 	cuentaRepo      ports.CuentaRepository
 	transaccionRepo ports.TransaccionRepository
+	movimientoRepo  ports.MovimientoRepository
 }
 
 // NewBilleteraService es la función constructora (Inyección de Dependencias).
 // Devuelve la interfaz ports.BilleteraService para garantizar el cumplimiento del contrato.
-func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository) ports.BilleteraService {
+func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository, movimientoRepo ports.MovimientoRepository) ports.BilleteraService {
 	return &billeteraService{
 		cuentaRepo:      cuentaRepo,
 		transaccionRepo: transaccionRepo,
+		movimientoRepo:  movimientoRepo,
 	}
 }
 
@@ -196,4 +199,20 @@ func (s *billeteraService) EliminarCuenta(id string) error {
 		return domain.ErrCuentaConSaldo
 	}
 	return s.cuentaRepo.Eliminar(id)
+}
+
+func (s *billeteraService) ListarMovimientosPorCuenta(ctx context.Context, cuentaID string) ([]domain.Movimiento, error) {
+	// 1. Validar que la cuenta existe
+	_, err := s.ConsultarCuenta(cuentaID)
+	if err != nil {
+		return nil, fmt.Errorf("la cuenta con ID %s no existe: %w", cuentaID, err)
+	}
+
+	// 2. Consultar el historial en el repositorio de movimientos
+	movimientos, err := s.movimientoRepo.ObtenerPorCuentaID(ctx, cuentaID)
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener movimientos: %w", err)
+	}
+
+	return movimientos, nil
 }

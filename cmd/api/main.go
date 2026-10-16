@@ -93,9 +93,10 @@ func main() {
 	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
 	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)
 	transaccionRepo := storage.NewPostgresTransaccionStorage(dbPool)
+	movimientoRepo := storage.NewMovimientoRepositoryPostgres(dbPool)
 
 	// Inyectamos ambos repositorios en el Servicio (Núcleo)
-	billeteraService := services.NewBilleteraService(cuentaRepo, transaccionRepo)
+	billeteraService := services.NewBilleteraService(cuentaRepo, transaccionRepo, movimientoRepo)
 
 	// 5. Inyectamos el servicio en el Adaptador de entrada (Handler HTTP)
 	billeteraHandler := handlers.NewBilleteraHandler(billeteraService)
