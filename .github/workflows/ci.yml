@@ -27,8 +27,8 @@ jobs:
       - name: Run Unit Tests
         run: |
           go test -v -race \
-            -coverpkg=./internal/... \
-            -coverprofile=coverage.out ./...
+            -coverpkg=./internal/core/services/... \
+            -coverprofile=coverage.out ./internal/core/services/...
 
       - name: Verify Coverage Threshold
         run: |

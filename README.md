@@ -134,3 +134,4 @@ go test -v -tags=integration ./internal/adapters/storage/...
 - [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
 - [x] Fase 7: Migración a PostgreSQL con `pgxpool`, transacciones ACID y bloqueos de fila (`SELECT ... FOR UPDATE`) para alta concurrencia.
 - [x] Fase 8: Pruebas de Integración automatizadas con Testcontainers y PostgreSQL real.
+- [x] Fase 9: Pipeline de Integración Continua (CI/CD) con GitHub Actions.
