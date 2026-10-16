@@ -101,6 +101,14 @@ go test -v -cover ./internal/core/services/...
 
 ---
 
+## Pruebas de Integración (con Testcontainers)
+
+Para validar los repositorios contra una instancia real y efímera de PostgreSQL mediante contenedores Docker ejecuta:
+
+go test -v -tags=integration ./internal/adapters/storage/...
+
+---
+
 ## Endpoints de la API (v1)
 
 | Método | Endpoint | Descripción |
@@ -125,3 +133,4 @@ go test -v -cover ./internal/core/services/...
 - [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
 - [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
 - [x] Fase 7: Migración a PostgreSQL con `pgxpool`, transacciones ACID y bloqueos de fila (`SELECT ... FOR UPDATE`) para alta concurrencia.
+- [x] Fase 8: Pruebas de Integración automatizadas con Testcontainers y PostgreSQL real.
