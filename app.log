@@ -4222,3 +4222,146 @@
 {"time":"2026-10-16T14:37:51.066245934Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas","ip":"172.30.0.8","latency":192628}
 {"time":"2026-10-16T14:37:51.418209435Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas","ip":"172.30.0.8","latency":265462}
 {"time":"2026-10-16T14:37:51.635232282Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas","ip":"172.30.0.8","latency":1028104}
+{"time":"2026-10-17T15:51:19.97967226Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-17T15:51:19.97967199Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T15:54:39.217987918Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T15:54:39.223257876Z","level":"INFO","msg":"Conexión exitosa y verificada con PostgreSQL (pgxpool)"}
+{"time":"2026-10-17T15:54:39.223503955Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-17T15:55:09.259922995Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/auth/token","ip":"172.18.0.1","latency":119674}
+{"time":"2026-10-17T15:55:57.776655448Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":401,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":19999}
+{"time":"2026-10-17T15:56:26.458987508Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":401,"method":"GET","path":"/api/v1/cuentas/cta-1790805853906889153","ip":"172.18.0.1","latency":30738}
+{"time":"2026-10-17T15:56:35.10663818Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":401,"method":"DELETE","path":"/api/v1/cuentas/ID_DE_USUARIO","ip":"172.18.0.1","latency":47887}
+{"time":"2026-10-17T15:56:45.61528517Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":401,"method":"PUT","path":"/api/v1/cuentas/ID_DE_LA_CUENTA","ip":"172.18.0.1","latency":25779}
+{"time":"2026-10-17T15:57:00.3222756Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":401,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":14449}
+{"time":"2026-10-17T15:58:11.956891295Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":3485189}
+{"time":"2026-10-17T15:58:39.745460261Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":500,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":312685}
+{"time":"2026-10-17T15:58:48.57950684Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":500,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":294257}
+{"time":"2026-10-17T17:47:45.930282647Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":500,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":266927}
+{"time":"2026-10-17T17:47:52.48321419Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":291777}
+{"time":"2026-10-17T18:05:12.194898486Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:12.1959924Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: hostname resolving error: lookup postgres on 127.0.0.11:53: server misbehaving"}
+{"time":"2026-10-17T18:05:12.623354848Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:12.624221763Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.2:5432 (postgres): dial error: dial tcp 172.18.0.2:5432: connect: connection refused"}
+{"time":"2026-10-17T18:05:13.051729795Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:13.052634247Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.2:5432 (postgres): dial error: dial tcp 172.18.0.2:5432: connect: connection refused"}
+{"time":"2026-10-17T18:05:13.704732913Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:13.70573939Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.2:5432 (postgres): dial error: dial tcp 172.18.0.2:5432: connect: connection refused"}
+{"time":"2026-10-17T18:05:14.750873402Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:14.751686914Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.2:5432 (postgres): dial error: dial tcp 172.18.0.2:5432: connect: connection refused"}
+{"time":"2026-10-17T18:05:16.571554654Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T18:05:16.593832566Z","level":"INFO","msg":"Conexión exitosa y verificada con PostgreSQL (pgxpool)"}
+{"time":"2026-10-17T18:05:16.594171888Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-17T18:07:28.61168407Z","level":"INFO","msg":"Petición HTTP procesada","status":201,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":6569068}
+{"time":"2026-10-17T18:07:42.98810967Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":1505201}
+{"time":"2026-10-17T18:18:33.847182822Z","level":"INFO","msg":"Petición HTTP procesada","status":201,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":5397972}
+{"time":"2026-10-17T18:18:40.163175231Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":334475}
+{"time":"2026-10-17T18:19:49.819386765Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":500,"method":"POST","path":"/api/v1/cuentas/cta-1792260448605233041/transferir","ip":"172.18.0.1","latency":8264759}
+{"time":"2026-10-17T18:33:45.335431303Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/cuentas/cta-1792260448605233041/transferir","ip":"172.18.0.1","latency":11890005}
+{"time":"2026-10-17T18:33:52.34938226Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":397869}
+{"time":"2026-10-17T18:35:18.904624331Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"PUT","path":"/api/v1/cuentas/cta-1792260448605233041","ip":"172.18.0.1","latency":1960512}
+{"time":"2026-10-17T18:35:27.785132339Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":369534}
+{"time":"2026-10-17T18:39:35.663923872Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/cuentas/cta-1792261113841827479/transferir","ip":"172.18.0.1","latency":11695721}
+{"time":"2026-10-17T18:39:42.833316892Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":500087}
+{"time":"2026-10-17T18:40:16.065200818Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":400,"method":"POST","path":"/api/v1/cuentas/cta-1792261113841827479/transferir","ip":"172.18.0.1","latency":66050}
+{"time":"2026-10-17T18:54:50.332621186Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":397827}
+{"time":"2026-10-17T18:54:52.090275619Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":407627}
+{"time":"2026-10-17T18:54:52.737494062Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":278195}
+{"time":"2026-10-17T18:54:53.439606253Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":261494}
+{"time":"2026-10-17T18:55:31.917585257Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":343115}
+{"time":"2026-10-17T18:55:52.060582711Z","level":"INFO","msg":"Petición HTTP procesada","status":201,"method":"POST","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":5320623}
+{"time":"2026-10-17T18:56:01.196777221Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":410407}
+{"time":"2026-10-17T18:57:41.524137349Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"POST","path":"/api/v1/cuentas/cta-1792261113841827479/retirar","ip":"172.18.0.1","latency":8459774}
+{"time":"2026-10-17T18:58:01.167427064Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":329595}
+{"time":"2026-10-17T18:58:01.21330803Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/api/v1/cuentas","ip":"172.18.0.1","latency":283234}
+{"time":"2026-10-17T19:08:55.442199782Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":165951}
+{"time":"2026-10-17T19:08:55.45988481Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":270842}
+{"time":"2026-10-17T19:08:55.460812617Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":22911}
+{"time":"2026-10-17T19:08:55.461914755Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":49511}
+{"time":"2026-10-17T19:08:55.462210477Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":415383}
+{"time":"2026-10-17T19:08:55.462797691Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":1032888}
+{"time":"2026-10-17T19:08:55.624142097Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":174031}
+{"time":"2026-10-17T19:08:55.666250502Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":32601}
+{"time":"2026-10-17T19:11:33.126422218Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":249401}
+{"time":"2026-10-17T19:11:33.176660571Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/favicon.ico","ip":"172.18.0.1","latency":190}
+{"time":"2026-10-17T19:18:22.515837943Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":82932}
+{"time":"2026-10-17T19:18:22.530274303Z","level":"INFO","msg":"Petición HTTP procesada","status":304,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":19508}
+{"time":"2026-10-17T19:18:22.530913263Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":7979}
+{"time":"2026-10-17T19:18:22.531788541Z","level":"INFO","msg":"Petición HTTP procesada","status":304,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":32417}
+{"time":"2026-10-17T19:18:22.532300803Z","level":"INFO","msg":"Petición HTTP procesada","status":304,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":44976}
+{"time":"2026-10-17T19:18:22.532402014Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":44106}
+{"time":"2026-10-17T19:18:22.65443816Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":353177}
+{"time":"2026-10-17T19:18:22.690923028Z","level":"INFO","msg":"Petición HTTP procesada","status":304,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":22818}
+{"time":"2026-10-17T19:18:31.286889543Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":37557}
+{"time":"2026-10-17T19:18:31.303029156Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":13079}
+{"time":"2026-10-17T19:18:31.303841321Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":28357}
+{"time":"2026-10-17T19:18:31.345848082Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":173034}
+{"time":"2026-10-17T19:19:02.045987163Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/","ip":"172.18.0.1","latency":34617}
+{"time":"2026-10-17T19:19:02.060236097Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui.css","ip":"172.18.0.1","latency":19108}
+{"time":"2026-10-17T19:19:02.061311313Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/index.css","ip":"172.18.0.1","latency":15489}
+{"time":"2026-10-17T19:19:02.061783242Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui-bundle.js","ip":"172.18.0.1","latency":16739}
+{"time":"2026-10-17T19:19:02.061813389Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":10539}
+{"time":"2026-10-17T19:19:02.061820669Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/swagger-initializer.js","ip":"172.18.0.1","latency":25908}
+{"time":"2026-10-17T19:19:02.079416231Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/favicon-32x32.png","ip":"172.18.0.1","latency":23498}
+{"time":"2026-10-17T19:19:02.096324083Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/favicon-16x16.png","ip":"172.18.0.1","latency":14659}
+{"time":"2026-10-17T19:19:05.898079991Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/","ip":"172.18.0.1","latency":36197}
+{"time":"2026-10-17T19:19:05.908417762Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui.css","ip":"172.18.0.1","latency":15748}
+{"time":"2026-10-17T19:19:05.911630092Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/index.css","ip":"172.18.0.1","latency":15669}
+{"time":"2026-10-17T19:19:05.912120529Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui-bundle.js","ip":"172.18.0.1","latency":12979}
+{"time":"2026-10-17T19:19:05.912240309Z","level":"WARN","msg":"Petición HTTP procesada con error cliente/servidor","status":404,"method":"GET","path":"/swagger/index.html/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":12638}
+{"time":"2026-10-17T19:19:05.912258628Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html/swagger-initializer.js","ip":"172.18.0.1","latency":30907}
+{"time":"2026-10-17T19:19:34.881807192Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":58945}
+{"time":"2026-10-17T19:19:34.901963382Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":22978}
+{"time":"2026-10-17T19:19:34.902899604Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":51305}
+{"time":"2026-10-17T19:19:34.967576346Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":247900}
+{"time":"2026-10-17T19:21:30.138715499Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":59516}
+{"time":"2026-10-17T19:21:30.153908917Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":12759}
+{"time":"2026-10-17T19:21:30.154524195Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":23558}
+{"time":"2026-10-17T19:21:30.211398318Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":200386}
+{"time":"2026-10-17T19:21:48.3994185Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":35988}
+{"time":"2026-10-17T19:21:48.413969721Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":216195}
+{"time":"2026-10-17T19:21:48.414636716Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":10929}
+{"time":"2026-10-17T19:21:48.415278304Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":31658}
+{"time":"2026-10-17T19:21:48.415500419Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":318179}
+{"time":"2026-10-17T19:21:48.415599992Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":862822}
+{"time":"2026-10-17T19:21:48.468210379Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":166149}
+{"time":"2026-10-17T19:21:48.471462413Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":63316}
+{"time":"2026-10-17T19:24:32.475445975Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:32.476251814Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.3:5432 (postgres): dial error: dial tcp 172.18.0.3:5432: connect: connection refused"}
+{"time":"2026-10-17T19:24:32.911228756Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:32.912036514Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.3:5432 (postgres): dial error: dial tcp 172.18.0.3:5432: connect: connection refused"}
+{"time":"2026-10-17T19:24:33.365315689Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:33.366145266Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.3:5432 (postgres): dial error: dial tcp 172.18.0.3:5432: connect: connection refused"}
+{"time":"2026-10-17T19:24:34.012489986Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:34.013569661Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.3:5432 (postgres): dial error: dial tcp 172.18.0.3:5432: connect: connection refused"}
+{"time":"2026-10-17T19:24:35.057451633Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:35.058260341Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: 172.18.0.3:5432 (postgres): dial error: dial tcp 172.18.0.3:5432: connect: connection refused"}
+{"time":"2026-10-17T19:24:36.880232178Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:24:36.89186761Z","level":"INFO","msg":"Conexión exitosa y verificada con PostgreSQL (pgxpool)"}
+{"time":"2026-10-17T19:24:36.892112437Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-17T19:25:00.917354076Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":264597}
+{"time":"2026-10-17T19:25:00.942236532Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":14419}
+{"time":"2026-10-17T19:25:00.942963126Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":36748}
+{"time":"2026-10-17T19:25:01.123968352Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":312665}
+{"time":"2026-10-17T19:58:28.684452897Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:58:28.685482202Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: hostname resolving error: lookup postgres on 127.0.0.11:53: server misbehaving"}
+{"time":"2026-10-17T19:58:29.066891729Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:58:29.068108214Z","level":"ERROR","msg":"No se pudo establecer conexión con PostgreSQL (Ping fallido)","error":"failed to connect to `user=goallet_user database=goallet_db`: hostname resolving error: lookup postgres on 127.0.0.11:53: server misbehaving"}
+{"time":"2026-10-17T19:58:29.476092931Z","level":"INFO","msg":"Servidor de métricas Prometheus escuchando en :2112/metrics"}
+{"time":"2026-10-17T19:58:29.493158338Z","level":"INFO","msg":"Conexión exitosa y verificada con PostgreSQL (pgxpool)"}
+{"time":"2026-10-17T19:58:29.493425854Z","level":"INFO","msg":"Servidor HTTP iniciado exitosamente","url":"http://localhost:8080"}
+{"time":"2026-10-17T19:59:03.459151088Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":252567}
+{"time":"2026-10-17T19:59:03.483800541Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":295595}
+{"time":"2026-10-17T19:59:03.485073186Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":34648}
+{"time":"2026-10-17T19:59:03.485278495Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":29928}
+{"time":"2026-10-17T19:59:03.485645256Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":434928}
+{"time":"2026-10-17T19:59:03.486011468Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":866326}
+{"time":"2026-10-17T19:59:03.610495119Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":316943}
+{"time":"2026-10-17T19:59:03.616540208Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":31519}
+{"time":"2026-10-17T20:02:52.157514015Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.html","ip":"172.18.0.1","latency":68077}
+{"time":"2026-10-17T20:02:52.172434879Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui.css","ip":"172.18.0.1","latency":262069}
+{"time":"2026-10-17T20:02:52.175507564Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/index.css","ip":"172.18.0.1","latency":14190}
+{"time":"2026-10-17T20:02:52.176256624Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-initializer.js","ip":"172.18.0.1","latency":57067}
+{"time":"2026-10-17T20:02:52.177765813Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-bundle.js","ip":"172.18.0.1","latency":927542}
+{"time":"2026-10-17T20:02:52.177805551Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/swagger-ui-standalone-preset.js","ip":"172.18.0.1","latency":799957}
+{"time":"2026-10-17T20:02:52.320634398Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/doc.json","ip":"172.18.0.1","latency":170503}
+{"time":"2026-10-17T20:02:52.359903295Z","level":"INFO","msg":"Petición HTTP procesada","status":200,"method":"GET","path":"/swagger/favicon-32x32.png","ip":"172.18.0.1","latency":27678}

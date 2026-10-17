@@ -11,8 +11,9 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Julian Serna Saavedra",
-            "url": "https://github.com/Julianfreak/Goallet-api"
+            "name": "Julian Dario Serna Saavedra",
+            "url": "https://github.com/Julianfreak/Goallet-api",
+            "email": "julianrideon@gmail.com"
         },
         "license": {
             "name": "MIT",
@@ -23,8 +24,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/cuentas/{id}/movimientos": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retorna la lista de todos los movimientos y auditoría de una cuenta específica",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movimientos"
+                ],
+                "summary": "Consultar historial de transacciones (Ledger)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la Cuenta (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Movimiento"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/cuentas": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Obtiene el listado completo de cuentas registradas en el sistema",
                 "produces": [
                     "application/json"
@@ -39,19 +82,24 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                                "$ref": "#/definitions/domain.Cuenta"
                             }
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Registra un titular y asigna un saldo inicial opcional",
                 "consumes": [
                     "application/json"
@@ -70,7 +118,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest"
+                            "$ref": "#/definitions/dto.CrearCuentaRequest"
                         }
                     }
                 ],
@@ -78,19 +126,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                            "$ref": "#/definitions/domain.Cuenta"
                         }
                     },
                     "400": {
                         "description": "Formato de datos inválido o titular ausente",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -98,6 +146,11 @@ const docTemplate = `{
         },
         "/cuentas/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Obtiene la información detallada de una cuenta existente",
                 "produces": [
                     "application/json"
@@ -119,24 +172,29 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                            "$ref": "#/definitions/domain.Cuenta"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Modifica el nombre del titular asociado a una cuenta",
                 "consumes": [
                     "application/json"
@@ -162,7 +220,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest"
+                            "$ref": "#/definitions/dto.ActualizarTitularRequest"
                         }
                     }
                 ],
@@ -170,19 +228,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Cuenta"
+                            "$ref": "#/definitions/domain.Cuenta"
                         }
                     },
                     "400": {
                         "description": "Petición inválida",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -209,25 +267,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Cuenta eliminada exitosamente",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.MensajeResponse"
+                            "$ref": "#/definitions/dto.MensajeResponse"
                         }
                     },
                     "400": {
                         "description": "La cuenta tiene saldo pendiente",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -235,6 +293,11 @@ const docTemplate = `{
         },
         "/cuentas/{id}/depositar": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Incrementa el saldo de una cuenta con un monto positivo",
                 "consumes": [
                     "application/json"
@@ -260,7 +323,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest"
+                            "$ref": "#/definitions/dto.OperacionMontoRequest"
                         }
                     }
                 ],
@@ -268,25 +331,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                            "$ref": "#/definitions/domain.Transaccion"
                         }
                     },
                     "400": {
                         "description": "Monto inválido o cuerpo de petición incorrecto",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -294,6 +357,11 @@ const docTemplate = `{
         },
         "/cuentas/{id}/retirar": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Deduce un monto de una cuenta si dispone de saldo suficiente",
                 "consumes": [
                     "application/json"
@@ -319,7 +387,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest"
+                            "$ref": "#/definitions/dto.OperacionMontoRequest"
                         }
                     }
                 ],
@@ -327,25 +395,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                            "$ref": "#/definitions/domain.Transaccion"
                         }
                     },
                     "400": {
                         "description": "Monto inválido o saldo insuficiente",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -353,6 +421,11 @@ const docTemplate = `{
         },
         "/cuentas/{id}/transferir": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Realiza una transferencia desde la cuenta origen hacia la cuenta de destino",
                 "consumes": [
                     "application/json"
@@ -378,7 +451,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.TransferirRequest"
+                            "$ref": "#/definitions/dto.TransferirRequest"
                         }
                     }
                 ],
@@ -386,25 +459,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_core_domain.Transaccion"
+                            "$ref": "#/definitions/domain.Transaccion"
                         }
                     },
                     "400": {
                         "description": "Datos inválidos, saldo insuficiente o misma cuenta",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Cuenta no encontrada",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Error interno del servidor",
                         "schema": {
-                            "$ref": "#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -412,76 +485,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest": {
-            "type": "object",
-            "required": [
-                "nuevo_titular"
-            ],
-            "properties": {
-                "nuevo_titular": {
-                    "type": "string"
-                }
-            }
-        },
-        "goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest": {
-            "type": "object",
-            "required": [
-                "titular"
-            ],
-            "properties": {
-                "saldo_inicial": {
-                    "type": "number"
-                },
-                "titular": {
-                    "type": "string"
-                }
-            }
-        },
-        "goallet-api_internal_adapters_handlers_dto.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "mensaje de error explicativo"
-                }
-            }
-        },
-        "goallet-api_internal_adapters_handlers_dto.MensajeResponse": {
-            "type": "object",
-            "properties": {
-                "mensaje": {
-                    "type": "string",
-                    "example": "operación realizada exitosamente"
-                }
-            }
-        },
-        "goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest": {
-            "type": "object",
-            "required": [
-                "monto"
-            ],
-            "properties": {
-                "monto": {
-                    "type": "number"
-                }
-            }
-        },
-        "goallet-api_internal_adapters_handlers_dto.TransferirRequest": {
-            "type": "object",
-            "required": [
-                "cuenta_destino_id",
-                "monto"
-            ],
-            "properties": {
-                "cuenta_destino_id": {
-                    "type": "string"
-                },
-                "monto": {
-                    "type": "number"
-                }
-            }
-        },
-        "goallet-api_internal_core_domain.Cuenta": {
+        "domain.Cuenta": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -498,7 +502,48 @@ const docTemplate = `{
                 }
             }
         },
-        "goallet-api_internal_core_domain.TipoTransaccion": {
+        "domain.Movimiento": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "cuenta_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "monto": {
+                    "type": "number"
+                },
+                "saldo_anterior": {
+                    "type": "number"
+                },
+                "saldo_nuevo": {
+                    "type": "number"
+                },
+                "tipo": {
+                    "$ref": "#/definitions/domain.TipoMovimiento"
+                }
+            }
+        },
+        "domain.TipoMovimiento": {
+            "type": "string",
+            "enum": [
+                "DEPOSITO",
+                "RETIRO",
+                "TRANSFERENCIA_ENVIADA",
+                "TRANSFERENCIA_RECIBIDA"
+            ],
+            "x-enum-varnames": [
+                "TipoDeposito",
+                "TipoRetiro",
+                "TipoTransferenciaEnviada",
+                "TipoTransferenciaRecibida"
+            ]
+        },
+        "domain.TipoTransaccion": {
             "type": "string",
             "enum": [
                 "DEPOSITO",
@@ -511,7 +556,7 @@ const docTemplate = `{
                 "Transferencia"
             ]
         },
-        "goallet-api_internal_core_domain.Transaccion": {
+        "domain.Transaccion": {
             "type": "object",
             "properties": {
                 "cuenta_destino_id": {
@@ -530,9 +575,86 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "tipo": {
-                    "$ref": "#/definitions/goallet-api_internal_core_domain.TipoTransaccion"
+                    "$ref": "#/definitions/domain.TipoTransaccion"
                 }
             }
+        },
+        "dto.ActualizarTitularRequest": {
+            "type": "object",
+            "required": [
+                "nuevo_titular"
+            ],
+            "properties": {
+                "nuevo_titular": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CrearCuentaRequest": {
+            "type": "object",
+            "required": [
+                "titular"
+            ],
+            "properties": {
+                "saldo_inicial": {
+                    "type": "number"
+                },
+                "titular": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "mensaje de error explicativo"
+                }
+            }
+        },
+        "dto.MensajeResponse": {
+            "type": "object",
+            "properties": {
+                "mensaje": {
+                    "type": "string",
+                    "example": "operación realizada exitosamente"
+                }
+            }
+        },
+        "dto.OperacionMontoRequest": {
+            "type": "object",
+            "required": [
+                "monto"
+            ],
+            "properties": {
+                "monto": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.TransferirRequest": {
+            "type": "object",
+            "required": [
+                "cuenta_destino_id",
+                "monto"
+            ],
+            "properties": {
+                "cuenta_destino_id": {
+                    "type": "string"
+                },
+                "monto": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Escribe \"Bearer \" seguido de tu token JWT. Ejemplo: \"Bearer eyJhbGciOi...\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -540,11 +662,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8090",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Goallet API",
-	Description:      "Motor backend transaccional para billetera digital de alta concurrencia.",
+	Title:            "Goallet API - Motor Transaccional de Billetera Digital",
+	Description:      "API RESTful para gestión de cuentas, transacciones y auditoría financiera con arquitectura hexagonal.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

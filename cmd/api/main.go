@@ -24,19 +24,25 @@ import (
 	"goallet-api/internal/core/services"
 )
 
-// @title           Goallet API
+// @title           Goallet API - Motor Transaccional de Billetera Digital
 // @version         1.0
-// @description     Motor backend transaccional para billetera digital de alta concurrencia.
+// @description     API RESTful para gestión de cuentas, transacciones y auditoría financiera con arquitectura hexagonal.
 // @termsOfService  http://swagger.io/terms/
 
-// @contact.name   Julian Serna Saavedra
+// @contact.name   Julian Dario Serna Saavedra
 // @contact.url    https://github.com/Julianfreak/Goallet-api
+// @contact.email  julianrideon@gmail.com
 
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 
-// @host      localhost:8080
+// @host      localhost:8090
 // @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Escribe "Bearer " seguido de tu token JWT. Ejemplo: "Bearer eyJhbGciOi..."
 
 func main() {
 	fmt.Println("==========================================================")

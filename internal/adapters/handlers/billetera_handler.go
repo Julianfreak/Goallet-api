@@ -31,6 +31,7 @@ func NewBilleteraHandler(service ports.BilleteraService) *BilleteraHandler {
 // @Success      201  {object}  domain.Cuenta
 // @Failure      400  {object}  dto.ErrorResponse "Formato de datos inválido o titular ausente"
 // @Failure      500  {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas [post]
 func (h *BilleteraHandler) CrearCuenta(c *gin.Context) {
 	var req dto.CrearCuentaRequest
@@ -58,6 +59,7 @@ func (h *BilleteraHandler) CrearCuenta(c *gin.Context) {
 // @Success      200  {object}  domain.Cuenta
 // @Failure      404  {object}  dto.ErrorResponse "Cuenta no encontrada"
 // @Failure      500  {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas/{id} [get]
 func (h *BilleteraHandler) ConsultarCuenta(c *gin.Context) {
 	id := c.Param("id")
@@ -87,6 +89,7 @@ func (h *BilleteraHandler) ConsultarCuenta(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse "Monto inválido o cuerpo de petición incorrecto"
 // @Failure      404      {object}  dto.ErrorResponse "Cuenta no encontrada"
 // @Failure      500      {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas/{id}/depositar [post]
 func (h *BilleteraHandler) Depositar(c *gin.Context) {
 	id := c.Param("id")
@@ -125,6 +128,7 @@ func (h *BilleteraHandler) Depositar(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse "Monto inválido o saldo insuficiente"
 // @Failure      404      {object}  dto.ErrorResponse "Cuenta no encontrada"
 // @Failure      500      {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas/{id}/retirar [post]
 func (h *BilleteraHandler) Retirar(c *gin.Context) {
 	id := c.Param("id")
@@ -163,6 +167,7 @@ func (h *BilleteraHandler) Retirar(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse "Datos inválidos, saldo insuficiente o misma cuenta"
 // @Failure      404      {object}  dto.ErrorResponse "Cuenta no encontrada"
 // @Failure      500      {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas/{id}/transferir [post]
 func (h *BilleteraHandler) Transferir(c *gin.Context) {
 	origenID := c.Param("id")
@@ -196,6 +201,7 @@ func (h *BilleteraHandler) Transferir(c *gin.Context) {
 // @Produce      json
 // @Success      200  {array}   domain.Cuenta
 // @Failure      500  {object}  dto.ErrorResponse "Error interno del servidor"
+// @Security     BearerAuth
 // @Router       /cuentas [get]
 func (h *BilleteraHandler) ListarCuentas(c *gin.Context) {
 	cuentas, err := h.service.ListarCuentas()
@@ -218,6 +224,7 @@ func (h *BilleteraHandler) ListarCuentas(c *gin.Context) {
 // @Success      200      {object}  domain.Cuenta
 // @Failure      400      {object}  dto.ErrorResponse "Petición inválida"
 // @Failure      404      {object}  dto.ErrorResponse "Cuenta no encontrada"
+// @Security     BearerAuth
 // @Router       /cuentas/{id} [put]
 func (h *BilleteraHandler) ActualizarTitular(c *gin.Context) {
 	id := c.Param("id")
@@ -280,6 +287,7 @@ func (h *BilleteraHandler) EliminarCuenta(c *gin.Context) {
 // @Param        id   path      string  true  "ID de la Cuenta (UUID)"
 // @Success      200  {array}   domain.Movimiento
 // @Router       /api/v1/cuentas/{id}/movimientos [get]
+// @Security     BearerAuth
 func (h *BilleteraHandler) ConsultarMovimientos(c *gin.Context) {
 	cuentaID := c.Param("id")
 

@@ -17,12 +17,14 @@ func NewAuthHandler() *AuthHandler {
 }
 
 // GenerarToken godoc
-// @Summary      Generar token JWT de prueba
-// @Description  Emite un token JWT con vigencia de 24 horas para consumir los endpoints protegidos
+// @Summary      Generar token JWT de acceso
+// @Description  Emite un token JWT con firmado HMAC-SHA256 válido por 24 horas para consumir los endpoints protegidos.
 // @Tags         Autenticación
+// @Accept       json
 // @Produce      json
-// @Success      200  {object}  map[string]string
-// @Router       /api/v1/auth/token [post]
+// @Success      200  {object}  map[string]string "Token generado exitosamente"
+// @Failure      500  {object}  map[string]string "Error interno al firmar el token"
+// @Security     BearerAuth
 func (h *AuthHandler) GenerarToken(c *gin.Context) {
 	claims := jwt.MapClaims{
 		"sub": "admin-goallet-user",

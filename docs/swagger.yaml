@@ -1,51 +1,6 @@
 basePath: /api/v1
 definitions:
-  goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest:
-    properties:
-      nuevo_titular:
-        type: string
-    required:
-    - nuevo_titular
-    type: object
-  goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest:
-    properties:
-      saldo_inicial:
-        type: number
-      titular:
-        type: string
-    required:
-    - titular
-    type: object
-  goallet-api_internal_adapters_handlers_dto.ErrorResponse:
-    properties:
-      error:
-        example: mensaje de error explicativo
-        type: string
-    type: object
-  goallet-api_internal_adapters_handlers_dto.MensajeResponse:
-    properties:
-      mensaje:
-        example: operación realizada exitosamente
-        type: string
-    type: object
-  goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest:
-    properties:
-      monto:
-        type: number
-    required:
-    - monto
-    type: object
-  goallet-api_internal_adapters_handlers_dto.TransferirRequest:
-    properties:
-      cuenta_destino_id:
-        type: string
-      monto:
-        type: number
-    required:
-    - cuenta_destino_id
-    - monto
-    type: object
-  goallet-api_internal_core_domain.Cuenta:
+  domain.Cuenta:
     properties:
       created_at:
         type: string
@@ -56,7 +11,36 @@ definitions:
       titular:
         type: string
     type: object
-  goallet-api_internal_core_domain.TipoTransaccion:
+  domain.Movimiento:
+    properties:
+      created_at:
+        type: string
+      cuenta_id:
+        type: string
+      id:
+        type: string
+      monto:
+        type: number
+      saldo_anterior:
+        type: number
+      saldo_nuevo:
+        type: number
+      tipo:
+        $ref: '#/definitions/domain.TipoMovimiento'
+    type: object
+  domain.TipoMovimiento:
+    enum:
+    - DEPOSITO
+    - RETIRO
+    - TRANSFERENCIA_ENVIADA
+    - TRANSFERENCIA_RECIBIDA
+    type: string
+    x-enum-varnames:
+    - TipoDeposito
+    - TipoRetiro
+    - TipoTransferenciaEnviada
+    - TipoTransferenciaRecibida
+  domain.TipoTransaccion:
     enum:
     - DEPOSITO
     - RETIRO
@@ -66,7 +50,7 @@ definitions:
     - Deposito
     - Retiro
     - Transferencia
-  goallet-api_internal_core_domain.Transaccion:
+  domain.Transaccion:
     properties:
       cuenta_destino_id:
         type: string
@@ -79,21 +63,92 @@ definitions:
       monto:
         type: number
       tipo:
-        $ref: '#/definitions/goallet-api_internal_core_domain.TipoTransaccion'
+        $ref: '#/definitions/domain.TipoTransaccion'
     type: object
-host: localhost:8080
+  dto.ActualizarTitularRequest:
+    properties:
+      nuevo_titular:
+        type: string
+    required:
+    - nuevo_titular
+    type: object
+  dto.CrearCuentaRequest:
+    properties:
+      saldo_inicial:
+        type: number
+      titular:
+        type: string
+    required:
+    - titular
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        example: mensaje de error explicativo
+        type: string
+    type: object
+  dto.MensajeResponse:
+    properties:
+      mensaje:
+        example: operación realizada exitosamente
+        type: string
+    type: object
+  dto.OperacionMontoRequest:
+    properties:
+      monto:
+        type: number
+    required:
+    - monto
+    type: object
+  dto.TransferirRequest:
+    properties:
+      cuenta_destino_id:
+        type: string
+      monto:
+        type: number
+    required:
+    - cuenta_destino_id
+    - monto
+    type: object
+host: localhost:8090
 info:
   contact:
-    name: Julian Serna Saavedra
+    email: julianrideon@gmail.com
+    name: Julian Dario Serna Saavedra
     url: https://github.com/Julianfreak/Goallet-api
-  description: Motor backend transaccional para billetera digital de alta concurrencia.
+  description: API RESTful para gestión de cuentas, transacciones y auditoría financiera
+    con arquitectura hexagonal.
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
   termsOfService: http://swagger.io/terms/
-  title: Goallet API
+  title: Goallet API - Motor Transaccional de Billetera Digital
   version: "1.0"
 paths:
+  /api/v1/cuentas/{id}/movimientos:
+    get:
+      description: Retorna la lista de todos los movimientos y auditoría de una cuenta
+        específica
+      parameters:
+      - description: ID de la Cuenta (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Movimiento'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Consultar historial de transacciones (Ledger)
+      tags:
+      - Movimientos
   /cuentas:
     get:
       description: Obtiene el listado completo de cuentas registradas en el sistema
@@ -104,12 +159,14 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/goallet-api_internal_core_domain.Cuenta'
+              $ref: '#/definitions/domain.Cuenta'
             type: array
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Listar todas las cuentas
       tags:
       - Cuentas
@@ -123,22 +180,24 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.CrearCuentaRequest'
+          $ref: '#/definitions/dto.CrearCuentaRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Cuenta'
+            $ref: '#/definitions/domain.Cuenta'
         "400":
           description: Formato de datos inválido o titular ausente
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Crear nueva cuenta bancaria
       tags:
       - Cuentas
@@ -158,19 +217,19 @@ paths:
         "200":
           description: Cuenta eliminada exitosamente
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.MensajeResponse'
+            $ref: '#/definitions/dto.MensajeResponse'
         "400":
           description: La cuenta tiene saldo pendiente
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Eliminar una cuenta
       tags:
       - Cuentas
@@ -188,15 +247,17 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Cuenta'
+            $ref: '#/definitions/domain.Cuenta'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Consultar cuenta por ID
       tags:
       - Cuentas
@@ -215,22 +276,24 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ActualizarTitularRequest'
+          $ref: '#/definitions/dto.ActualizarTitularRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Cuenta'
+            $ref: '#/definitions/domain.Cuenta'
         "400":
           description: Petición inválida
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Actualizar el titular de una cuenta
       tags:
       - Cuentas
@@ -250,26 +313,28 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest'
+          $ref: '#/definitions/dto.OperacionMontoRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Transaccion'
+            $ref: '#/definitions/domain.Transaccion'
         "400":
           description: Monto inválido o cuerpo de petición incorrecto
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Realizar un depósito
       tags:
       - Transacciones
@@ -289,26 +354,28 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.OperacionMontoRequest'
+          $ref: '#/definitions/dto.OperacionMontoRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Transaccion'
+            $ref: '#/definitions/domain.Transaccion'
         "400":
           description: Monto inválido o saldo insuficiente
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Realizar un retiro
       tags:
       - Transacciones
@@ -329,27 +396,35 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.TransferirRequest'
+          $ref: '#/definitions/dto.TransferirRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/goallet-api_internal_core_domain.Transaccion'
+            $ref: '#/definitions/domain.Transaccion'
         "400":
           description: Datos inválidos, saldo insuficiente o misma cuenta
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Cuenta no encontrada
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Error interno del servidor
           schema:
-            $ref: '#/definitions/goallet-api_internal_adapters_handlers_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Transferir fondos entre cuentas
       tags:
       - Transacciones
+securityDefinitions:
+  BearerAuth:
+    description: 'Escribe "Bearer " seguido de tu token JWT. Ejemplo: "Bearer eyJhbGciOi..."'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
