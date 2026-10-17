@@ -12,6 +12,11 @@ import (
 // ==========================================================
 // 1. MOCKS DE PERSISTENCIA
 // ==========================================================
+
+type MockMovimientoRepo struct {
+	movimientos        []domain.Movimiento
+	forzarErrorObtener error
+}
 type MockCuentaRepo struct {
 	cuentas               map[string]*domain.Cuenta
 	forzarErrorGuardar    error
@@ -553,8 +558,54 @@ func TestActualizarTitular_ErrorActualizar(t *testing.T) {
 	})
 }
 
-type MockMovimientoRepo struct {
-	movimientos []domain.Movimiento
+func TestListarMovimientosPorCuenta_Exito(t *testing.T) {
+	mockCuenta := NewMockCuentaRepo()
+	mockTx := NewMockTxRepo()
+	mockMovimiento := NewMockMovimientoRepo()
+
+	cuentaID := "123"
+	cuenta := &domain.Cuenta{ID: cuentaID, Titular: "Julian", Saldo: 500.0}
+	mockCuenta.Guardar(cuenta)
+
+	// Registrar un movimiento simulado
+	mockMovimiento.movimientos = append(mockMovimiento.movimientos, domain.Movimiento{
+		ID:            "mov-1",
+		CuentaID:      cuentaID,
+		Tipo:          domain.TipoDeposito,
+		Monto:         100.0,
+		SaldoAnterior: 400.0,
+		SaldoNuevo:    500.0,
+	})
+
+	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+
+	movimientos, err := service.ListarMovimientosPorCuenta(context.Background(), cuentaID)
+
+	if err != nil {
+		t.Fatalf("no se esperaba error, se obtuvo: %v", err)
+	}
+
+	if len(movimientos) != 1 {
+		t.Errorf("se esperaba 1 movimiento, se obtuvieron %d", len(movimientos))
+	}
+
+	if movimientos[0].ID != "mov-1" {
+		t.Errorf("se esperaba el movimiento mov-1, se obtuvo %s", movimientos[0].ID)
+	}
+}
+
+func TestListarMovimientosPorCuenta_CuentaNoExiste(t *testing.T) {
+	mockCuenta := NewMockCuentaRepo()
+	mockTx := NewMockTxRepo()
+	mockMovimiento := NewMockMovimientoRepo()
+
+	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+
+	_, err := service.ListarMovimientosPorCuenta(context.Background(), "cuenta-inexistente")
+
+	if err == nil {
+		t.Error("se esperaba un error debido a que la cuenta no existe, pero se obtuvo nil")
+	}
 }
 
 func NewMockMovimientoRepo() *MockMovimientoRepo {
@@ -569,6 +620,9 @@ func (m *MockMovimientoRepo) Registrar(ctx context.Context, tx interface{}, mov 
 }
 
 func (m *MockMovimientoRepo) ObtenerPorCuentaID(ctx context.Context, cuentaID string) ([]domain.Movimiento, error) {
+	if m.forzarErrorObtener != nil {
+		return nil, m.forzarErrorObtener
+	}
 	var resultado []domain.Movimiento
 	for _, mov := range m.movimientos {
 		if mov.CuentaID == cuentaID {
