@@ -17,10 +17,11 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 ---
 
-## Características Técnicas y Observabilidad
+## Características Técnicas, Seguridad y Observabilidad
 
 - **Lenguaje:** Go 1.23+
 - **Framework Web:** Gin Gonic v1.10+
+- **Seguridad:** Autenticación y autorización basada en **JSON Web Tokens (JWT)** con firmados HMAC-SHA256 (`github.com/golang-jwt/jwt/v5`).
 - **Base de Datos:** PostgreSQL 16+ con driver de alto rendimiento `pgx/v5`.
 - **Diseño:** Arquitectura Hexagonal y Domain-Driven Design (DDD).
 - **Consistencia ACID y Concurrencia Segura:** Uso de transacciones explícitas con **bloqueos a nivel de fila (`SELECT ... FOR UPDATE`)** para prevenir condiciones de carrera (*race conditions*) y dobles gastos bajo alta concurrencia.
@@ -111,16 +112,18 @@ go test -v -tags=integration ./internal/adapters/storage/...
 
 ## Endpoints de la API (v1)
 
-| Método | Endpoint | Descripción |
-| --- | --- | --- |
-| **POST** | `/api/v1/cuentas` | Crea una nueva cuenta bancaria |
-| **GET** | `/api/v1/cuentas` | Lista todas las cuentas registradas |
-| **GET** | `/api/v1/cuentas/:id` | Consulta los detalles y saldo de una cuenta por ID |
-| **PUT** | `/api/v1/cuentas/:id` | Actualiza el nombre del titular de la cuenta |
-| **DELETE** | `/api/v1/cuentas/:id` | Elimina una cuenta (solo si su saldo es $0) |
-| **POST** | `/api/v1/cuentas/:id/depositar` | Realiza un depósito de fondos |
-| **POST** | `/api/v1/cuentas/:id/retirar` | Retira fondos validando saldo disponible |
-| **POST** | `/api/v1/cuentas/:id/transferir` | Transfiere saldo de forma atómica entre cuentas |
+| Método | Endpoint | Acceso | Descripción |
+| --- | --- | --- | --- |
+| **POST** | `/api/v1/auth/token` | **Público** | Emite un token de acceso JWT válido por 24 horas |
+| **POST** | `/api/v1/cuentas` | **Protegido** | Crea una nueva cuenta bancaria |
+| **GET** | `/api/v1/cuentas` | **Protegido** | Lista todas las cuentas registradas |
+| **GET** | `/api/v1/cuentas/:id` | **Protegido** | Consulta los detalles y saldo de una cuenta por ID |
+| **PUT** | `/api/v1/cuentas/:id` | **Protegido** | Actualiza el nombre del titular de la cuenta |
+| **DELETE** | `/api/v1/cuentas/:id` | **Protegido** | Elimina una cuenta (solo si su saldo es $0) |
+| **POST** | `/api/v1/cuentas/:id/depositar` | **Protegido** | Realiza un depósito de fondos |
+| **POST** | `/api/v1/cuentas/:id/retirar` | **Protegido** | Retira fondos validando saldo disponible |
+| **POST** | `/api/v1/cuentas/:id/transferir` | **Protegido** | Transfiere saldo de forma atómica entre cuentas |
+| **GET** | `/api/v1/cuentas/:id/movimientos` | **Protegido** | Consulta el extracto histórico y auditoría (Ledger) |
 
 ---
 
@@ -128,10 +131,12 @@ go test -v -tags=integration ./internal/adapters/storage/...
 
 - [x] Fase 1: Dominio, Puertos y Servicios de Billetera.
 - [x] Fase 2: Adaptador de Persistencia en Memoria inicial (`sync.RWMutex`).
-- [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic** y CRUD completo.
-- [x] Fase 4: Observabilidad Nativa (Logs estructurados en JSON con `slog` en `app.log` + servidor de métricas Prometheus en `:2112`).
-- [x] Fase 5: Integración con el Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
-- [x] Fase 6: Pruebas Unitarias con Mocks y 100% de Cobertura (`httptest`, `services` y `handlers`).
-- [x] Fase 7: Migración a PostgreSQL con `pgxpool`, transacciones ACID y bloqueos de fila (`SELECT ... FOR UPDATE`) para alta concurrencia.
-- [x] Fase 8: Pruebas de Integración automatizadas con Testcontainers y PostgreSQL real.
-- [x] Fase 9: Pipeline de Integración Continua (CI/CD) con GitHub Actions.
+- [x] Fase 3: Adaptador de Entrada HTTP REST con framework **Gin Gonic**.
+- [x] Fase 4: Observabilidad Nativa (`slog` + Prometheus).
+- [x] Fase 5: Stack de Monitoreo (Alloy, Prometheus, Loki y Grafana).
+- [x] Fase 6: Pruebas Unitarias con Mocks y Cobertura >80%.
+- [x] Fase 7: Migración a PostgreSQL con `pgxpool` y bloqueos de fila (`SELECT ... FOR UPDATE`).
+- [x] Fase 8: Pruebas de Integración automatizadas con **Testcontainers**.
+- [x] Fase 9: Pipeline de Integración Continua (CI/CD) con **GitHub Actions**.
+- [x] Fase 10: Módulo de Auditoría e Historial de Transacciones (**Ledger**).
+- [x] Fase 11: Autenticación y Seguridad con **JWT Middleware**.

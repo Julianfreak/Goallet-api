@@ -19,6 +19,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"goallet-api/internal/adapters/handlers"
+	"goallet-api/internal/adapters/handlers/middleware"
 	"goallet-api/internal/adapters/storage"
 	"goallet-api/internal/core/services"
 )
@@ -100,6 +101,7 @@ func main() {
 
 	// 5. Inyectamos el servicio en el Adaptador de entrada (Handler HTTP)
 	billeteraHandler := handlers.NewBilleteraHandler(billeteraService)
+	authHandler := handlers.NewAuthHandler()
 
 	// 6. Inicializamos Gin sin el logger por defecto (usaremos slog en formato JSON)
 	router := gin.New()
@@ -110,19 +112,30 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 7. Mapeamos las rutas de la API REST
-	api := router.Group("/api/v1")
+	v1 := router.Group("/api/v1")
 	{
-		// --- CRUD DE CUENTAS ---
-		api.POST("/cuentas", billeteraHandler.CrearCuenta)          // Create
-		api.GET("/cuentas", billeteraHandler.ListarCuentas)         // Read (todas)
-		api.GET("/cuentas/:id", billeteraHandler.ConsultarCuenta)   // Read (por ID)
-		api.PUT("/cuentas/:id", billeteraHandler.ActualizarTitular) // Update (solo titular)
-		api.DELETE("/cuentas/:id", billeteraHandler.EliminarCuenta) // Delete (solo si saldo == 0)
+		// --- RUTA PÚBLICA DE AUTENTICACIÓN ---
+		v1.POST("/auth/token", authHandler.GenerarToken)
 
-		// --- OPERACIONES TRANSACCIONALES ---
-		api.POST("/cuentas/:id/depositar", billeteraHandler.Depositar)
-		api.POST("/cuentas/:id/retirar", billeteraHandler.Retirar)
-		api.POST("/cuentas/:id/transferir", billeteraHandler.Transferir)
+		// --- RUTAS PROTEGIDAS CON JWT ---
+		protegidas := v1.Group("/cuentas")
+		protegidas.Use(middleware.AuthMiddleware()) // Middleware que valida el token Bearer
+		{
+			// CRUD de Cuentas
+			protegidas.POST("", billeteraHandler.CrearCuenta)          // Create
+			protegidas.GET("", billeteraHandler.ListarCuentas)         // Read (todas)
+			protegidas.GET("/:id", billeteraHandler.ConsultarCuenta)   // Read (por ID)
+			protegidas.PUT("/:id", billeteraHandler.ActualizarTitular) // Update (solo titular)
+			protegidas.DELETE("/:id", billeteraHandler.EliminarCuenta) // Delete (solo si saldo == 0)
+
+			// Operaciones Transaccionales
+			protegidas.POST("/:id/depositar", billeteraHandler.Depositar)
+			protegidas.POST("/:id/retirar", billeteraHandler.Retirar)
+			protegidas.POST("/:id/transferir", billeteraHandler.Transferir)
+
+			// Historial / Auditoría (Ledger)
+			protegidas.GET("/:id/movimientos", billeteraHandler.ConsultarMovimientos)
+		}
 	}
 
 	// 8. Encendemos el servidor HTTP principal en el puerto 8080
