@@ -122,6 +122,8 @@ func main() {
 	{
 		// --- RUTA PÚBLICA DE AUTENTICACIÓN ---
 		v1.POST("/auth/token", authHandler.GenerarToken)
+		// Middleware de Idempotencia para operaciones financieras
+		idempotency := middleware.IdempotencyMiddleware(dbPool)
 
 		// --- RUTAS PROTEGIDAS CON JWT ---
 		protegidas := v1.Group("/cuentas")
@@ -135,9 +137,9 @@ func main() {
 			protegidas.DELETE("/:id", billeteraHandler.EliminarCuenta) // Delete (solo si saldo == 0)
 
 			// Operaciones Transaccionales
-			protegidas.POST("/:id/depositar", billeteraHandler.Depositar)
-			protegidas.POST("/:id/retirar", billeteraHandler.Retirar)
-			protegidas.POST("/:id/transferir", billeteraHandler.Transferir)
+			protegidas.POST("/:id/depositar", idempotency, billeteraHandler.Depositar)
+			protegidas.POST("/:id/retirar", idempotency, billeteraHandler.Retirar)
+			protegidas.POST("/:id/transferir", idempotency, billeteraHandler.Transferir)
 
 			// Historial / Auditoría (Ledger)
 			protegidas.GET("/:id/movimientos", billeteraHandler.ConsultarMovimientos)

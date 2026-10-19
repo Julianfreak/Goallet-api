@@ -30,6 +30,7 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 - **Métricas Prometheus:** Servidor dedicado en goroutine independiente (`:2112/metrics`) para recolección de telemetría de Go y runtime.
 - **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
 - **Contenedorización:** Soporte multi-contenedor mediante Docker Compose con paridad total entre entornos de trabajo.
+- **Idempotencia Financiera:** Soporte para el encabezado `X-Idempotency-Key` (UUID) en endpoints transaccionales (depósitos, retiros y transferencias), previniendo cargos duplicados ante reintentos de red o fallos de cliente mediante almacenamiento y respuesta en caché persistente.
 
 ---
 

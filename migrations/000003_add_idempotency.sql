@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+    key VARCHAR(100) PRIMARY KEY,
+    status_code INT NOT NULL,
+    response_body TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
