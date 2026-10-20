@@ -17,3 +17,4 @@ goallet-api
 
 .DS_Store
 .env
+app.log

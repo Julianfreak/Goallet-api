@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	_ "goallet-api/docs"
@@ -146,12 +148,44 @@ func main() {
 		}
 	}
 
-	// 8. Encendemos el servidor HTTP principal en el puerto 8080
-	slog.Info("Servidor HTTP iniciado exitosamente", "url", "http://localhost:8080")
-	if err := router.Run(":8080"); err != nil {
-		slog.Error("Error al iniciar el servidor Gin", "error", err)
-		os.Exit(1)
+	// 8. Configuración del Servidor HTTP con soporte para Graceful Shutdown
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
 	}
+
+	// Canal en goroutine paralela para iniciar el servidor HTTP sin bloquear la ejecución principal
+	go func() {
+		slog.Info("Servidor HTTP iniciado exitosamente", "url", "http://localhost:8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("Error no esperado en el servidor HTTP", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	// 9. Captura de señales de interrupción del sistema operativo (SIGINT, SIGTERM)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Bloquea la ejecución hasta que se reciba una señal de apagado
+	sig := <-quit
+	slog.Info("Señal de apagado recibida, iniciando cierre elegante...", "signal", sig.String())
+
+	// Contexto con timeout de 10 segundos para dar tiempo a las peticiones activas a finalizar
+	ctxShutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Detenemos el servidor HTTP esperando peticiones activas
+	if err := srv.Shutdown(ctxShutdown); err != nil {
+		slog.Error("Forzando el apagado del servidor HTTP por timeout/error", "error", err)
+	} else {
+		slog.Info("Servidor HTTP detenido correctamente sin interrumpir peticiones activas")
+	}
+
+	// Cierre explícito del pool de conexiones a PostgreSQL
+	slog.Info("Cerrando pool de conexiones a PostgreSQL (pgxpool)...")
+	dbPool.Close()
+	slog.Info("Aplicación Goallet API finalizada limpiamente")
 }
 
 // Helper para leer variables de entorno con valor por defecto
