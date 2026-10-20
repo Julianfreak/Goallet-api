@@ -51,6 +51,20 @@ PORT=8080
 API_PORT=8090
 GF_ADMIN_PASSWORD=tu_password_seguro_local
 
+## 🐳 Despliegue con Docker Compose
+
+El proyecto incluye un entorno completamente contenerizado para la API, PostgreSQL, Prometheus, Grafana y Loki.
+
+### Inicialización de la Base de Datos
+Las migraciones SQL se ejecutan automáticamente de forma nativa la primera vez que se crea el contenedor de PostgreSQL gracias al mapeo en `/docker-entrypoint-initdb.d/`.
+
+### ⚠️ Advertencia Importante sobre Volúmenes
+Para detener los servicios conservando tus cuentas, transacciones y datos de prueba, utiliza siempre:
+\`\`\`bash
+docker compose down
+\`\`\`
+**No utilices** `docker compose down -v` a menos que desees eliminar por completo el volumen persistente de PostgreSQL y reiniciar la base de datos desde cero.
+
 ### 2. Levantar el Stack Completo
 Ejecuta el siguiente comando para construir la imagen de la API y levantar todos los servicios (PostgreSQL con healthcheck, API, Prometheus, Loki, Grafana y Alloy):
 

@@ -19,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 
 	"goallet-api/internal/adapters/handlers"
 	"goallet-api/internal/adapters/handlers/middleware"
@@ -53,14 +54,16 @@ func main() {
 
 	ctx := context.Background()
 
-	// 1. Configuración de Logs JSON (slog) hacia Consola y app.log
+	// 1. Configuración de Logs JSON (slog) hacia Consola y app.log (con fallback seguro)
+	var multiWriter io.Writer = os.Stdout
 	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("No se pudo abrir app.log: %v", err)
+	if err == nil {
+		defer file.Close()
+		multiWriter = io.MultiWriter(os.Stdout, file)
+	} else {
+		log.Printf("Advertencia: No se pudo abrir app.log (%v). Los logs se registrarán únicamente en os.Stdout", err)
 	}
-	defer file.Close()
 
-	multiWriter := io.MultiWriter(os.Stdout, file)
 	logger := slog.New(slog.NewJSONHandler(multiWriter, nil))
 	slog.SetDefault(logger)
 
@@ -121,6 +124,9 @@ func main() {
 
 	// 7. Mapeamos las rutas de la API REST
 	v1 := router.Group("/api/v1")
+	// Aplicar Rate Limiter global a todas las rutas de la API (ej. 10 req/s, ráfaga de 20)
+	limiter := middleware.NewIPRateLimiter(rate.Limit(10), 20)
+	v1.Use(middleware.RateLimitMiddleware(limiter))
 	{
 		// --- RUTA PÚBLICA DE AUTENTICACIÓN ---
 		v1.POST("/auth/token", authHandler.GenerarToken)
