@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -54,17 +52,9 @@ func main() {
 
 	ctx := context.Background()
 
-	// 1. Configuración de Logs JSON (slog) hacia Consola y app.log (con fallback seguro)
-	var multiWriter io.Writer = os.Stdout
-	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err == nil {
-		defer file.Close()
-		multiWriter = io.MultiWriter(os.Stdout, file)
-	} else {
-		log.Printf("Advertencia: No se pudo abrir app.log (%v). Los logs se registrarán únicamente en os.Stdout", err)
-	}
+	// 1. Configuración de Logs JSON (slog) hacia la salida estándar (Stdout)
 
-	logger := slog.New(slog.NewJSONHandler(multiWriter, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
 	// 2. Servidor de Métricas Prometheus en Goroutine paralela (:2112)

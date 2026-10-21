@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"goallet-api/internal/adapters/handlers"
 	"goallet-api/internal/core/domain"
@@ -472,4 +473,7 @@ func (m *MockMovimientoRepo) Registrar(ctx context.Context, tx interface{}, mov 
 
 func (m *MockMovimientoRepo) ObtenerPorCuentaID(ctx context.Context, cuentaID string) ([]domain.Movimiento, error) {
 	return []domain.Movimiento{}, nil
+}
+func (m *MockMovimientoRepo) ObtenerConFiltros(ctx context.Context, cuentaID string, fechaInicio, fechaFin *time.Time, limit, offset int) ([]domain.Movimiento, error) {
+	return m.ObtenerPorCuentaID(ctx, cuentaID)
 }

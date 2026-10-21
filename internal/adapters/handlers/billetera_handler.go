@@ -3,6 +3,8 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
+	"time"
 
 	"goallet-api/internal/adapters/handlers/dto"
 	"goallet-api/internal/core/domain"
@@ -281,21 +283,67 @@ func (h *BilleteraHandler) EliminarCuenta(c *gin.Context) {
 
 // ConsultarMovimientos godoc
 // @Summary      Consultar historial de transacciones (Ledger)
-// @Description  Retorna la lista de todos los movimientos y auditoría de una cuenta específica
+// @Description  Retorna la lista paginada y filtrada por fecha del ledger de una cuenta
 // @Tags         Movimientos
 // @Produce      json
-// @Param        id   path      string  true  "ID de la Cuenta (UUID)"
-// @Success      200  {array}   domain.Movimiento
+// @Param        id            path      string  true   "ID de la Cuenta"
+// @Param        limit         query     int     false  "Cantidad de registros por página (default 20)"
+// @Param        page          query     int     false  "Número de página (default 1)"
+// @Param        fecha_inicio  query     string  false  "Fecha inicial (YYYY-MM-DD o RFC3339)"
+// @Param        fecha_fin     query     string  false  "Fecha final (YYYY-MM-DD o RFC3339)"
+// @Success      200           object    map[string]interface{}
 // @Router       /api/v1/cuentas/{id}/movimientos [get]
 // @Security     BearerAuth
 func (h *BilleteraHandler) ConsultarMovimientos(c *gin.Context) {
 	cuentaID := c.Param("id")
 
-	movimientos, err := h.service.ListarMovimientosPorCuenta(c.Request.Context(), cuentaID)
+	// Paginación por defecto
+	limit := 20
+	page := 1
+
+	if l := c.Query("limit"); l != "" {
+		if parsedLimit, err := strconv.Atoi(l); err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	if p := c.Query("page"); p != "" {
+		if parsedPage, err := strconv.Atoi(p); err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
+	}
+
+	offset := (page - 1) * limit
+
+	// Filtros de Fecha opcionales
+	var fechaInicio, fechaFin *time.Time
+	if fi := c.Query("fecha_inicio"); fi != "" {
+		if t, err := time.Parse(time.RFC3339, fi); err == nil {
+			fechaInicio = &t
+		} else if t, err := time.Parse("2006-01-02", fi); err == nil {
+			startOfDay := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+			fechaInicio = &startOfDay
+		}
+	}
+
+	if ff := c.Query("fecha_fin"); ff != "" {
+		if t, err := time.Parse(time.RFC3339, ff); err == nil {
+			fechaFin = &t
+		} else if t, err := time.Parse("2006-01-02", ff); err == nil {
+			endOfDay := time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
+			fechaFin = &endOfDay
+		}
+	}
+
+	movimientos, err := h.service.ListarMovimientosConFiltros(c.Request.Context(), cuentaID, fechaInicio, fechaFin, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, movimientos)
+	c.JSON(http.StatusOK, gin.H{
+		"data":  movimientos,
+		"page":  page,
+		"limit": limit,
+	})
 }

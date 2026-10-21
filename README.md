@@ -6,9 +6,9 @@ Motor transaccional para billetera digital de alto rendimiento desarrollado en *
 
 ## Arquitectura del Proyecto
 
-El sistema aísla completamente la lógica del negocio de los frameworks web, mecanismos de persistencia y herramientas de telemetría:
+El sistema aísla completamente la lógica del negocio de los frameworks web, mecanismos de persistencia y herramientas de telemetría. ¿Por qué? Para garantizar que el núcleo financiero sea agnóstico a la infraestructura, altamente escalable y testeable mediante la inyección de dependencias (Mocks).
 
-- **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación).
+- **internal/core/domain:** Entidades puras y reglas de negocio inmutables (Cuenta, Transacciones, validaciones de saldo positivo y restricciones de eliminación). Decisión: Centralizar aquí las validaciones evita que la lógica de negocio se filtre a los controladores.
 - **internal/core/ports:** Interfaces que definen los contratos para repositorios de salida y casos de uso de entrada.
 - **internal/core/services:** Orquestación y casos de uso (CRUD de cuentas, Depósitos, Retiros y Transferencias seguras).
 - **internal/adapters/handlers:** Adaptador de entrada HTTP implementado con **Gin Gonic** y middlewares de registro estructurado.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"goallet-api/internal/core/domain"
 	"goallet-api/internal/core/services"
@@ -630,4 +631,7 @@ func (m *MockMovimientoRepo) ObtenerPorCuentaID(ctx context.Context, cuentaID st
 		}
 	}
 	return resultado, nil
+}
+func (m *MockMovimientoRepo) ObtenerConFiltros(ctx context.Context, cuentaID string, fechaInicio, fechaFin *time.Time, limit, offset int) ([]domain.Movimiento, error) {
+	return m.ObtenerPorCuentaID(ctx, cuentaID)
 }

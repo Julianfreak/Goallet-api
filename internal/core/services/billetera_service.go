@@ -144,12 +144,17 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 		return nil, err
 	}
 
+	saldoAnteriorOrigen := cuentaOrigen.Saldo
 	if err := cuentaOrigen.Retirar(monto); err != nil {
 		return nil, err
 	}
+	saldoNuevoOrigen := cuentaOrigen.Saldo
+
+	saldoAnteriorDestino := cuentaDestino.Saldo
 	if err := cuentaDestino.Depositar(monto); err != nil {
 		return nil, err
 	}
+	saldoNuevoDestino := cuentaDestino.Saldo
 
 	if err := s.cuentaRepo.Actualizar(cuentaOrigen); err != nil {
 		return nil, err
@@ -157,6 +162,7 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 	if err := s.cuentaRepo.Actualizar(cuentaDestino); err != nil {
 		return nil, err
 	}
+
 	transaccion := &domain.Transaccion{
 		ID:              fmt.Sprintf("tx-%d", time.Now().UnixNano()),
 		CuentaOrigenID:  origenID,
@@ -167,6 +173,28 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 	}
 	if err := s.transaccionRepo.Guardar(transaccion); err != nil {
 		return nil, err
+	}
+
+	// Registrar los movimientos en el Ledger para ambas cuentas
+	ctx := context.Background()
+	if err := s.movimientoRepo.Registrar(ctx, nil, &domain.Movimiento{
+		CuentaID:      origenID,
+		Tipo:          "TRANSFERENCIA_ENVIO",
+		Monto:         monto,
+		SaldoAnterior: saldoAnteriorOrigen,
+		SaldoNuevo:    saldoNuevoOrigen,
+	}); err != nil {
+		return nil, fmt.Errorf("error al registrar movimiento de origen: %w", err)
+	}
+
+	if err := s.movimientoRepo.Registrar(ctx, nil, &domain.Movimiento{
+		CuentaID:      destinoID,
+		Tipo:          "TRANSFERENCIA_RECIBIDA",
+		Monto:         monto,
+		SaldoAnterior: saldoAnteriorDestino,
+		SaldoNuevo:    saldoNuevoDestino,
+	}); err != nil {
+		return nil, fmt.Errorf("error al registrar movimiento de destino: %w", err)
 	}
 
 	return transaccion, nil
@@ -215,4 +243,7 @@ func (s *billeteraService) ListarMovimientosPorCuenta(ctx context.Context, cuent
 	}
 
 	return movimientos, nil
+}
+func (s *billeteraService) ListarMovimientosConFiltros(ctx context.Context, cuentaID string, fechaInicio, fechaFin *time.Time, limit, offset int) ([]domain.Movimiento, error) {
+	return s.movimientoRepo.ObtenerConFiltros(ctx, cuentaID, fechaInicio, fechaFin, limit, offset)
 }
