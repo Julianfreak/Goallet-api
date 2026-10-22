@@ -19,23 +19,27 @@ func NewMovimientoRepositoryPostgres(db *pgxpool.Pool) *MovimientoRepositoryPost
 }
 
 func (r *MovimientoRepositoryPostgres) Registrar(ctx context.Context, tx interface{}, mov *domain.Movimiento) error {
+	// Generar ID con prefijo si no viene definido
+	if mov.ID == "" {
+		mov.ID = fmt.Sprintf("mov-%d", time.Now().UnixNano())
+	}
+
 	query := `
-		INSERT INTO movimientos (cuenta_id, tipo, monto, saldo_anterior, saldo_nuevo)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at
+		INSERT INTO movimientos (id, cuenta_id, tipo, monto, saldo_anterior, saldo_nuevo)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING created_at
 	`
 
 	var err error
 	var row pgx.Row
 
-	// Permite ejecutar la inserción dentro de una transacción existente o usando el pool directamente
 	if sqlTx, ok := tx.(pgx.Tx); ok {
-		row = sqlTx.QueryRow(ctx, query, mov.CuentaID, mov.Tipo, mov.Monto, mov.SaldoAnterior, mov.SaldoNuevo)
+		row = sqlTx.QueryRow(ctx, query, mov.ID, mov.CuentaID, mov.Tipo, mov.Monto, mov.SaldoAnterior, mov.SaldoNuevo)
 	} else {
-		row = r.db.QueryRow(ctx, query, mov.CuentaID, mov.Tipo, mov.Monto, mov.SaldoAnterior, mov.SaldoNuevo)
+		row = r.db.QueryRow(ctx, query, mov.ID, mov.CuentaID, mov.Tipo, mov.Monto, mov.SaldoAnterior, mov.SaldoNuevo)
 	}
 
-	err = row.Scan(&mov.ID, &mov.CreatedAt)
+	err = row.Scan(&mov.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("error al registrar movimiento en ledger: %w", err)
 	}
