@@ -101,7 +101,7 @@
             "uid": "loki-ds"
           },
           "editorMode": "code",
-          "expr": "{filename=\"/var/log/app.log\"}",
+          "expr": "{app=\"goallet-api\"}",
           "queryType": "range",
           "refId": "A"
         }
