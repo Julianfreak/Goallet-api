@@ -118,8 +118,22 @@ services:
     networks:
       - monitoring
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: goallet-rabbitmq
+    ports:
+      - "5672:5672"   # Puerto de mensajería AMQP
+      - "15672:15672" # Interfaz web de RabbitMQ (Management UI)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - goallet-net
+
 networks:
   monitoring:
+    driver: bridge
+  goallet-net:
     driver: bridge
 volumes:
   grafana-data:

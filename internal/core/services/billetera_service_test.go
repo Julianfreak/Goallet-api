@@ -31,6 +31,17 @@ func NewMockCuentaRepo() *MockCuentaRepo {
 	}
 }
 
+type MockEventPublisher struct {
+	PublishTransferenciaFunc func(event domain.TransferenciaEvent) error
+}
+
+func (m *MockEventPublisher) PublishTransferencia(event domain.TransferenciaEvent) error {
+	if m.PublishTransferenciaFunc != nil {
+		return m.PublishTransferenciaFunc(event)
+	}
+	return nil
+}
+
 func (m *MockCuentaRepo) Guardar(cuenta *domain.Cuenta) error {
 	if m.forzarErrorGuardar != nil {
 		return m.forzarErrorGuardar
@@ -151,7 +162,12 @@ func TestCrearCuenta(t *testing.T) {
 			mockCuenta.forzarErrorGuardar = tt.errRepo // Activamos el error simulado
 			mockTx := NewMockTxRepo()
 			mockMovimiento := NewMockMovimientoRepo()
-			service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+			mockEventPub := &MockEventPublisher{
+				PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+					return nil // Simula éxito al publicar
+				},
+			}
+			service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 			cuentaCreada, err := service.CrearCuenta(tt.titular, tt.saldoInicial)
 
@@ -186,7 +202,12 @@ func TestTransferir(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		// Precargamos las cuentas en el mock
 		mockCuenta.cuentas["cta-origen"] = &domain.Cuenta{ID: "cta-origen", Titular: "Origen", Saldo: 500.0}
@@ -223,7 +244,12 @@ func TestTransferir(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil // Simula éxito al publicar
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		_, err := service.Transferir("cta-1", "cta-1", 50.0)
 
@@ -236,7 +262,12 @@ func TestTransferir(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-pobre"] = &domain.Cuenta{ID: "cta-pobre", Titular: "Sin Fondos", Saldo: 50.0}
 		mockCuenta.cuentas["cta-destino"] = &domain.Cuenta{ID: "cta-destino", Titular: "Destino", Saldo: 100.0}
@@ -252,7 +283,12 @@ func TestTransferir(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		// Solo registramos la de destino; la de origen no existe
 		mockCuenta.cuentas["cta-destino"] = &domain.Cuenta{ID: "cta-destino", Titular: "Destino", Saldo: 100.0}
@@ -274,7 +310,12 @@ func TestEliminarCuenta(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-con-plata"] = &domain.Cuenta{ID: "cta-con-plata", Saldo: 150.0}
 
@@ -288,7 +329,12 @@ func TestEliminarCuenta(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil // Simula éxito al publicar
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-vacia"] = &domain.Cuenta{ID: "cta-vacia", Saldo: 0.0}
 
@@ -309,7 +355,12 @@ func TestEliminarCuenta(t *testing.T) {
 func TestConsultarCuenta(t *testing.T) {
 	t.Run("Fallo por ID vacío", func(t *testing.T) {
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento, mockEventPub)
 		_, err := service.ConsultarCuenta("")
 		if err == nil || err.Error() != "el ID de la cuenta es obligatorio" {
 			t.Errorf("Se esperaba error de ID obligatorio")
@@ -320,7 +371,12 @@ func TestConsultarCuenta(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.forzarErrorBuscar = errors.New("error de base de datos")
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		_, err := service.ConsultarCuenta("id-falso")
 		if err == nil {
@@ -333,7 +389,12 @@ func TestListarCuentas(t *testing.T) {
 	mockCuenta := NewMockCuentaRepo()
 	mockCuenta.cuentas["1"] = &domain.Cuenta{ID: "1"}
 	mockMovimiento := NewMockMovimientoRepo()
-	service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+	mockEventPub := &MockEventPublisher{
+		PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+			return nil
+		},
+	}
+	service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 	lista, err := service.ListarCuentas()
 	if err != nil || len(lista) != 1 {
@@ -350,7 +411,12 @@ func TestDepositar_ErroresInfraestructura(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-1"] = &domain.Cuenta{ID: "cta-1", Saldo: 100.0}
 		// Simulamos que la base de datos falla justo al hacer el UPDATE
@@ -366,7 +432,12 @@ func TestDepositar_ErroresInfraestructura(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-1"] = &domain.Cuenta{ID: "cta-1", Saldo: 100.0}
 		// Simulamos que la base de datos falla al guardar el historial (auditoría)
@@ -384,7 +455,12 @@ func TestRetirar_ErroresInfraestructura(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.forzarErrorBuscar = errors.New("db error")
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		_, err := service.Retirar("cta-1", 50.0)
 		if err == nil {
@@ -396,9 +472,13 @@ func TestRetirar_ErroresInfraestructura(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.cuentas["cta-1"] = &domain.Cuenta{ID: "cta-1", Saldo: 100.0}
 		mockCuenta.forzarErrorActualizar = errors.New("db error al actualizar")
-
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 		_, err := service.Retirar("cta-1", 50.0)
 		if err == nil {
 			t.Errorf("Se esperaba error al intentar guardar nuevo saldo")
@@ -413,7 +493,12 @@ func TestRetirar_ErroresInfraestructura(t *testing.T) {
 func TestActualizarTitular(t *testing.T) {
 	t.Run("Fallo por nombre vacío", func(t *testing.T) {
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento, mockEventPub)
 		_, err := service.ActualizarTitular("cta-1", "")
 		if err == nil || err.Error() != "el nuevo titular no puede estar vacío" {
 			t.Errorf("Se esperaba error por titular vacío")
@@ -422,7 +507,12 @@ func TestActualizarTitular(t *testing.T) {
 
 	t.Run("Fallo porque cuenta no existe", func(t *testing.T) {
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(NewMockCuentaRepo(), NewMockTxRepo(), mockMovimiento, mockEventPub)
 		_, err := service.ActualizarTitular("no-existe", "Nuevo Titular")
 		if err == nil {
 			t.Errorf("Se esperaba error de cuenta no encontrada")
@@ -433,7 +523,12 @@ func TestActualizarTitular(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.cuentas["cta-1"] = &domain.Cuenta{ID: "cta-1", Titular: "Viejo"}
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		cuenta, err := service.ActualizarTitular("cta-1", "Nuevo Titular")
 		if err != nil || cuenta.Titular != "Nuevo Titular" {
@@ -451,7 +546,12 @@ func TestRetirar_CoberturaFinal(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		// Preparamos una cuenta con saldo suficiente
 		mockCuenta.cuentas["cta-retiro"] = &domain.Cuenta{ID: "cta-retiro", Titular: "Julian", Saldo: 500.0}
@@ -478,7 +578,12 @@ func TestRetirar_CoberturaFinal(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockTx := NewMockTxRepo()
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 		mockCuenta.cuentas["cta-retiro"] = &domain.Cuenta{ID: "cta-retiro", Saldo: 500.0}
 
@@ -502,7 +607,12 @@ func TestDepositar_ErroresRestantes(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.forzarErrorBuscar = errors.New("cuenta no encontrada")
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		_, err := service.Depositar("id-inexistente", 100.0)
 		if err == nil {
@@ -515,7 +625,12 @@ func TestDepositar_ErroresRestantes(t *testing.T) {
 		mockCuenta := NewMockCuentaRepo()
 		mockCuenta.cuentas["cta-1"] = &domain.Cuenta{ID: "cta-1"}
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		// Le pasamos un monto inválido para que cuenta.Depositar() lance error
 		_, err := service.Depositar("cta-1", -50.0)
@@ -532,7 +647,12 @@ func TestRetirar_ErroresDominio(t *testing.T) {
 		// Creamos una cuenta con solo 10.0 de saldo
 		mockCuenta.cuentas["cta-pobre"] = &domain.Cuenta{ID: "cta-pobre", Saldo: 10.0}
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		// Intentamos retirar 100.0
 		_, err := service.Retirar("cta-pobre", 100.0)
@@ -550,7 +670,12 @@ func TestActualizarTitular_ErrorActualizar(t *testing.T) {
 		// Forzamos el error justo antes de hacer el update
 		mockCuenta.forzarErrorActualizar = errors.New("timeout BD")
 		mockMovimiento := NewMockMovimientoRepo()
-		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento)
+		mockEventPub := &MockEventPublisher{
+			PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+				return nil
+			},
+		}
+		service := services.NewBilleteraService(mockCuenta, NewMockTxRepo(), mockMovimiento, mockEventPub)
 
 		_, err := service.ActualizarTitular("cta-1", "Nuevo Nombre")
 		if err == nil {
@@ -578,7 +703,12 @@ func TestListarMovimientosPorCuenta_Exito(t *testing.T) {
 		SaldoNuevo:    500.0,
 	})
 
-	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+	mockEventPub := &MockEventPublisher{
+		PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+			return nil
+		},
+	}
+	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 	movimientos, err := service.ListarMovimientosPorCuenta(context.Background(), cuentaID)
 
@@ -600,7 +730,12 @@ func TestListarMovimientosPorCuenta_CuentaNoExiste(t *testing.T) {
 	mockTx := NewMockTxRepo()
 	mockMovimiento := NewMockMovimientoRepo()
 
-	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento)
+	mockEventPub := &MockEventPublisher{
+		PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+			return nil
+		},
+	}
+	service := services.NewBilleteraService(mockCuenta, mockTx, mockMovimiento, mockEventPub)
 
 	_, err := service.ListarMovimientosPorCuenta(context.Background(), "cuenta-inexistente")
 

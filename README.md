@@ -17,7 +17,7 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 ---
 
-## Características Técnicas, Seguridad y Observabilidad
+## 🚀 Características Técnicas, Seguridad y Observabilidad
 
 - **Lenguaje:** Go 1.23+
 - **Framework Web:** Gin Gonic v1.10+
@@ -31,6 +31,16 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 - **Dashboards (Grafana):** Tableros integrados conectando métricas de rendimiento (Prometheus) y trazabilidad de logs (Loki).
 - **Contenedorización:** Soporte multi-contenedor mediante Docker Compose con paridad total entre entornos de trabajo.
 - **Idempotencia Financiera:** Soporte para el encabezado `X-Idempotency-Key` (UUID) en endpoints transaccionales (depósitos, retiros y transferencias), previniendo cargos duplicados ante reintentos de red o fallos de cliente mediante almacenamiento y respuesta en caché persistente.
+
+## Nuevas Características y Arquitectura
+
+### 1. Ledger y Movimientos Financieros
+- **Auditoría de Cuentas:** Cada depósito, retiro o transferencia registra de forma automática su respectivo movimiento en la tabla `movimientos`.
+- **Paginación y Filtros:** El endpoint de movimientos (`GET /api/v1/cuentas/{id}/movimientos`) soporta parámetros de consulta para paginación (`limit`, `page`) y rangos de fecha (`fecha_inicio`, `fecha_fin`).
+
+### 2. Arquitectura Orientada a Eventos (RabbitMQ)
+- **Publicación Asíncrona:** Al completar exitosamente una transferencia, la API publica un evento `TransferenciaEvent` hacia un Exchange de RabbitMQ (`billetera.events`), desacoplando procesos secundarios (notificaciones, auditorías, analíticas) de la ruta crítica transaccional.
+
 
 ---
 

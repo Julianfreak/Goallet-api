@@ -15,15 +15,17 @@ type billeteraService struct {
 	cuentaRepo      ports.CuentaRepository
 	transaccionRepo ports.TransaccionRepository
 	movimientoRepo  ports.MovimientoRepository
+	eventPublisher  ports.EventPublisher
 }
 
 // NewBilleteraService es la función constructora (Inyección de Dependencias).
 // Devuelve la interfaz ports.BilleteraService para garantizar el cumplimiento del contrato.
-func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository, movimientoRepo ports.MovimientoRepository) ports.BilleteraService {
+func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository, movimientoRepo ports.MovimientoRepository, eventPublisher ports.EventPublisher) ports.BilleteraService {
 	return &billeteraService{
 		cuentaRepo:      cuentaRepo,
 		transaccionRepo: transaccionRepo,
 		movimientoRepo:  movimientoRepo,
+		eventPublisher:  eventPublisher,
 	}
 }
 
@@ -195,6 +197,17 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 		SaldoNuevo:    saldoNuevoDestino,
 	}); err != nil {
 		return nil, fmt.Errorf("error al registrar movimiento de destino: %w", err)
+	}
+
+	// Publicar evento en RabbitMQ (de forma no bloqueante para la respuesta principal)
+	if s.eventPublisher != nil {
+		_ = s.eventPublisher.PublishTransferencia(domain.TransferenciaEvent{
+			ID:              transaccion.ID,
+			CuentaOrigenID:  origenID,
+			CuentaDestinoID: destinoID,
+			Monto:           monto,
+			Timestamp:       time.Now(),
+		})
 	}
 
 	return transaccion, nil

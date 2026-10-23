@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -21,6 +22,7 @@ import (
 
 	"goallet-api/internal/adapters/handlers"
 	"goallet-api/internal/adapters/handlers/middleware"
+	"goallet-api/internal/adapters/messaging"
 	"goallet-api/internal/adapters/storage"
 	"goallet-api/internal/core/services"
 )
@@ -92,13 +94,26 @@ func main() {
 	}
 	slog.Info("Conexión exitosa y verificada con PostgreSQL (pgxpool)")
 
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://guest:guest@localhost:5672/"
+	}
+
+	eventPublisher, err := messaging.NewRabbitMQPublisher(rabbitURL)
+	if err != nil {
+		log.Printf("Advertencia: No se pudo conectar a RabbitMQ: %v. Las transferencias funcionarán sin eventos.", err)
+	} else {
+		defer eventPublisher.Close()
+		log.Println("Conectado exitosamente a RabbitMQ")
+	}
+
 	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
 	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)
 	transaccionRepo := storage.NewPostgresTransaccionStorage(dbPool)
 	movimientoRepo := storage.NewMovimientoRepositoryPostgres(dbPool)
 
 	// Inyectamos ambos repositorios en el Servicio (Núcleo)
-	billeteraService := services.NewBilleteraService(cuentaRepo, transaccionRepo, movimientoRepo)
+	billeteraService := services.NewBilleteraService(cuentaRepo, transaccionRepo, movimientoRepo, eventPublisher)
 
 	// 5. Inyectamos el servicio en el Adaptador de entrada (Handler HTTP)
 	billeteraHandler := handlers.NewBilleteraHandler(billeteraService)

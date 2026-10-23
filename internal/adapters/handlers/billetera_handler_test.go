@@ -34,6 +34,17 @@ func NewMockCuentaRepo() *MockCuentaRepo {
 	return &MockCuentaRepo{cuentas: make(map[string]*domain.Cuenta)}
 }
 
+type MockEventPublisher struct {
+	PublishTransferenciaFunc func(event domain.TransferenciaEvent) error
+}
+
+func (m *MockEventPublisher) PublishTransferencia(event domain.TransferenciaEvent) error {
+	if m.PublishTransferenciaFunc != nil {
+		return m.PublishTransferenciaFunc(event)
+	}
+	return nil
+}
+
 func (m *MockCuentaRepo) Guardar(c *domain.Cuenta) error {
 	if m.forzarErrorGuardar != nil {
 		return m.forzarErrorGuardar
@@ -106,8 +117,13 @@ func setupTestRouter(repoCuenta *MockCuentaRepo, mockTx *MockTxRepo) *gin.Engine
 		mockTx = &MockTxRepo{}
 	}
 	mockMovimiento := &MockMovimientoRepo{}
+	mockEventPub := &MockEventPublisher{
+		PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
+			return nil
+		},
+	}
 
-	service := services.NewBilleteraService(repoCuenta, mockTx, mockMovimiento)
+	service := services.NewBilleteraService(repoCuenta, mockTx, mockMovimiento, mockEventPub)
 	handler := handlers.NewBilleteraHandler(service)
 
 	router := gin.New()
