@@ -106,6 +106,17 @@ func main() {
 		defer eventPublisher.Close()
 		log.Println("Conectado exitosamente a RabbitMQ")
 	}
+	// Inicializar Consumer de RabbitMQ
+	consumer, err := messaging.NewRabbitMQConsumer(rabbitURL)
+	if err != nil {
+		slog.Error("No se pudo iniciar el consumidor de eventos", "error", err)
+	} else {
+		defer consumer.Stop()
+		err = consumer.StartConsuming("billetera.notificaciones", "transferencia.completada")
+		if err != nil {
+			slog.Error("Error al suscribirse a la cola de notificaciones", "error", err)
+		}
+	}
 
 	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
 	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)

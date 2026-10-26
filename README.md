@@ -38,8 +38,13 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 - **Auditoría de Cuentas:** Cada depósito, retiro o transferencia registra de forma automática su respectivo movimiento en la tabla `movimientos`.
 - **Paginación y Filtros:** El endpoint de movimientos (`GET /api/v1/cuentas/{id}/movimientos`) soporta parámetros de consulta para paginación (`limit`, `page`) y rangos de fecha (`fecha_inicio`, `fecha_fin`).
 
-### 2. Arquitectura Orientada a Eventos (RabbitMQ)
-- **Publicación Asíncrona:** Al completar exitosamente una transferencia, la API publica un evento `TransferenciaEvent` hacia un Exchange de RabbitMQ (`billetera.events`), desacoplando procesos secundarios (notificaciones, auditorías, analíticas) de la ruta crítica transaccional.
+## ⚡ Arquitectura Dirigida por Eventos (Async Worker)
+
+Goallet API implementa un modelo desacoplado basado en eventos para el procesamiento asíncrono de transacciones utilizando **RabbitMQ**.
+
+### Flujo de Eventos
+1. **Publicación (`EventPublisher`)**: Cuando una transferencia se completa con éxito, la API publica un `TransferenciaEvent` con la *routing key* `transferencia.completada` hacia el *topic exchange* de RabbitMQ (`billetera.events`).
+2. **Consumo (`EventConsumer`)**: Un worker en segundo plano (Go goroutine) suscrito a la cola `billetera.notificaciones` procesa los eventos de forma asíncrona con confirmación manual (`ack/nack`), garantizando robustez ante fallos.
 
 
 ---
