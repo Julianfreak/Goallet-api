@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"goallet-api/internal/core/domain"
 	"goallet-api/internal/core/ports"
+	"log/slog"
 	"time"
 )
 
@@ -16,16 +17,18 @@ type billeteraService struct {
 	transaccionRepo ports.TransaccionRepository
 	movimientoRepo  ports.MovimientoRepository
 	eventPublisher  ports.EventPublisher
+	auditRepo       ports.AuditRepository
 }
 
 // NewBilleteraService es la función constructora (Inyección de Dependencias).
 // Devuelve la interfaz ports.BilleteraService para garantizar el cumplimiento del contrato.
-func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository, movimientoRepo ports.MovimientoRepository, eventPublisher ports.EventPublisher) ports.BilleteraService {
+func NewBilleteraService(cuentaRepo ports.CuentaRepository, transaccionRepo ports.TransaccionRepository, movimientoRepo ports.MovimientoRepository, eventPublisher ports.EventPublisher, auditRepo ports.AuditRepository) ports.BilleteraService {
 	return &billeteraService{
 		cuentaRepo:      cuentaRepo,
 		transaccionRepo: transaccionRepo,
 		movimientoRepo:  movimientoRepo,
 		eventPublisher:  eventPublisher,
+		auditRepo:       auditRepo,
 	}
 }
 
@@ -201,13 +204,36 @@ func (s *billeteraService) Transferir(origenID, destinoID string, monto float64)
 
 	// Publicar evento en RabbitMQ (de forma no bloqueante para la respuesta principal)
 	if s.eventPublisher != nil {
-		_ = s.eventPublisher.PublishTransferencia(domain.TransferenciaEvent{
+		errPub := s.eventPublisher.PublishTransferencia(domain.TransferenciaEvent{
 			ID:              transaccion.ID,
 			CuentaOrigenID:  origenID,
 			CuentaDestinoID: destinoID,
 			Monto:           monto,
 			Timestamp:       time.Now(),
 		})
+
+		if errPub != nil {
+			slog.Error("⚠️ Falló RabbitMQ, registrando evento en auditoría", "error", errPub)
+
+			// Guardar respaldo en PostgreSQL
+			auditErr := s.auditRepo.GuardarEventoFallido(domain.EventoFallido{
+				TransaccionID: transaccion.ID,
+				Payload: domain.TransferenciaEvent{
+					ID:              transaccion.ID,
+					CuentaOrigenID:  origenID,
+					CuentaDestinoID: destinoID,
+					Monto:           monto,
+					Timestamp:       time.Now(),
+				},
+				ErrorDetalle: errPub.Error(),
+				Estado:       "FALLIDO",
+				Intentos:     1,
+			})
+
+			if auditErr != nil {
+				slog.Error("❌ Error crítico: no se pudo guardar en auditoría", "error", auditErr)
+			}
+		}
 	}
 
 	return transaccion, nil

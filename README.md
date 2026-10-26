@@ -42,6 +42,11 @@ El sistema aísla completamente la lógica del negocio de los frameworks web, me
 
 Goallet API implementa un modelo desacoplado basado en eventos para el procesamiento asíncrono de transacciones utilizando **RabbitMQ**.
 
+### Resiliencia y Auditoría de Eventos Fallidos (Fallback Strategy)
+Si al procesar o publicar un evento en RabbitMQ ocurre una falla (desconexión o indisponibilidad de la cola), la API implementa un mecanismo de fallback que persiste automáticamente la información en la tabla `eventos_auditoria` de PostgreSQL:
+- **Respaldo en BD (`AuditRepository`)**: Evita la pérdida de eventos registrando el `payload` (JSONB), la transacción asociada, el detalle del error y el contador de intentos.
+- **Tolerancia a Fallos**: Garantiza consistencia eventual permitiendo auditar o reintentar posteriormente la publicación de mensajes fallidos sin interrumpir la experiencia transaccional del cliente.
+
 ### Flujo de Eventos
 1. **Publicación (`EventPublisher`)**: Cuando una transferencia se completa con éxito, la API publica un `TransferenciaEvent` con la *routing key* `transferencia.completada` hacia el *topic exchange* de RabbitMQ (`billetera.events`).
 2. **Consumo (`EventConsumer`)**: Un worker en segundo plano (Go goroutine) suscrito a la cola `billetera.notificaciones` procesa los eventos de forma asíncrona con confirmación manual (`ack/nack`), garantizando robustez ante fallos.
@@ -111,6 +116,7 @@ swag init -g cmd/api/main.go --parseDependency --parseInternal
 | **Base de Datos (Postgres)** | `localhost:5432` | Motor relacional con persistencia transaccional ACID |
 | **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
 | **Tableros (Grafana)** | `http://localhost:3000` | Visualización centralizada de logs y métricas |
+| **Cola de mensajes (RabbitMQ)** | `http://localhost:15672` | Visualización centralizada de mensajes provenientes de transacciones |
 
 ---
 
@@ -170,3 +176,5 @@ go test -v -tags=integration ./internal/adapters/storage/...
 - [x] Fase 9: Pipeline de Integración Continua (CI/CD) con **GitHub Actions**.
 - [x] Fase 10: Módulo de Auditoría e Historial de Transacciones (**Ledger**).
 - [x] Fase 11: Autenticación y Seguridad con **JWT Middleware**.
+- [x] Fase 12: Arquitectura Dirigida por Eventos con **RabbitMQ** (Publicador y Worker Asíncrono).
+- [x] Fase 13: Estrategia de Fallback y Resiliencia con Tabla de Auditoría (`eventos_auditoria` en PostgreSQL).

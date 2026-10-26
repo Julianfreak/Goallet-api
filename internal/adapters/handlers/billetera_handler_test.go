@@ -30,6 +30,17 @@ type MockCuentaRepo struct {
 	forzarErrorEliminar   error
 }
 
+type MockAuditRepo struct {
+	forzarErrorGuardar error
+}
+
+func (m *MockAuditRepo) GuardarEventoFallido(evento domain.EventoFallido) error {
+	if m.forzarErrorGuardar != nil {
+		return m.forzarErrorGuardar
+	}
+	return nil
+}
+
 func NewMockCuentaRepo() *MockCuentaRepo {
 	return &MockCuentaRepo{cuentas: make(map[string]*domain.Cuenta)}
 }
@@ -117,13 +128,14 @@ func setupTestRouter(repoCuenta *MockCuentaRepo, mockTx *MockTxRepo) *gin.Engine
 		mockTx = &MockTxRepo{}
 	}
 	mockMovimiento := &MockMovimientoRepo{}
+	mockAudit := &MockAuditRepo{}
 	mockEventPub := &MockEventPublisher{
 		PublishTransferenciaFunc: func(event domain.TransferenciaEvent) error {
 			return nil
 		},
 	}
 
-	service := services.NewBilleteraService(repoCuenta, mockTx, mockMovimiento, mockEventPub)
+	service := services.NewBilleteraService(repoCuenta, mockTx, mockMovimiento, mockEventPub, mockAudit)
 	handler := handlers.NewBilleteraHandler(service)
 
 	router := gin.New()

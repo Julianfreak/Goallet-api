@@ -40,6 +40,17 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+--Tabla de Auditoría
+CREATE TABLE IF NOT EXISTS eventos_auditoria (
+    id SERIAL PRIMARY KEY,
+    transaccion_id VARCHAR(100) NOT NULL,
+    payload JSONB NOT NULL,
+    error_detalle TEXT NOT NULL,
+    estado VARCHAR(50) DEFAULT 'FALLIDO', -- FALLIDO, REINTENTANDO, PROCESADO
+    intentos INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices para optimizar consultas por cuenta
 CREATE INDEX IF NOT EXISTS idx_transacciones_cuenta_id ON transacciones(cuenta_id);
 CREATE INDEX IF NOT EXISTS idx_movimientos_cuenta_id ON movimientos(cuenta_id);
