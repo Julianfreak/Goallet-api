@@ -36,6 +36,7 @@ func NewMockCuentaRepo() *MockCuentaRepo {
 type MockAuditRepo struct {
 	GuardarEventoFallidoFunc func(evento domain.EventoFallido) error
 	forzarErrorGuardar       error
+	mock.Mock
 }
 
 func NewMockAuditRepo() *MockAuditRepo {
@@ -113,6 +114,21 @@ func (m *MockTxRepo) Guardar(tx *domain.Transaccion) error {
 
 func (m *MockTxRepo) ListarPorCuentaID(cuentaID string) ([]domain.Transaccion, error) {
 	return m.transacciones, nil
+}
+
+// Métodos faltantes que debes agregar a tu struct MockAuditRepo existente:
+
+func (m *MockAuditRepo) ListarPendientes() ([]domain.EventoFallido, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.EventoFallido), args.Error(1)
+}
+
+func (m *MockAuditRepo) ActualizarEstado(id int, estado string, intentos int) error {
+	args := m.Called(id, estado, intentos)
+	return args.Error(0)
 }
 
 // ==========================================================

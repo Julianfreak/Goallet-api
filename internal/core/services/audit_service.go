@@ -1,7 +1,8 @@
 package services
 
 import (
-	"context"
+	"encoding/json"
+	"goallet-api/internal/core/domain"
 	"goallet-api/internal/core/ports"
 	"log/slog"
 	"time"
@@ -20,10 +21,30 @@ func NewAuditService(auditRepo ports.AuditRepository, eventPub ports.EventPublis
 }
 
 // ReprocesarEventos lee eventos fallidos y reintenta su publicación
-func (s *AuditService) ReprocesarEventos(ctx context.Context) error {
+func (s *AuditService) ReprocesarEventos() error {
+	pendientes, err := s.auditRepo.ListarPendientes()
+	if err != nil {
+		return err // Propaga el error de listado
+	}
 
-	slog.Info("Iniciando ciclo de reproceso de eventos de auditoría...")
+	for _, evento := range pendientes {
+		var transferenciaEvent domain.TransferenciaEvent
+		payloadBytes, ok := evento.Payload.([]byte)
+		if !ok {
+			continue
+		}
 
+		if err := json.Unmarshal(payloadBytes, &transferenciaEvent); err != nil {
+			continue
+		}
+
+		errPub := s.eventPub.PublishTransferencia(transferenciaEvent)
+		if errPub == nil {
+			if errUpd := s.auditRepo.ActualizarEstado(evento.ID, "PROCESADO", evento.Intentos); errUpd != nil {
+				return errUpd // Propaga el error de actualización si falla
+			}
+		}
+	}
 	return nil
 }
 
@@ -32,8 +53,8 @@ func (s *AuditService) IniciarWorkerReproceso(intervalo time.Duration) {
 	ticker := time.NewTicker(intervalo)
 	go func() {
 		for range ticker.C {
-			ctx := context.Background()
-			if err := s.ReprocesarEventos(ctx); err != nil {
+			// Llamada corregida sin argumentos ya que ReprocesarEventos no los requiere
+			if err := s.ReprocesarEventos(); err != nil {
 				slog.Error("Error en worker de reproceso de auditoría", "error", err)
 			}
 		}

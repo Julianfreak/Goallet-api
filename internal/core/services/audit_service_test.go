@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"goallet-api/internal/core/domain"
+	"goallet-api/internal/core/services"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -32,6 +33,19 @@ func (m *MockAuditRepository) GuardarEventoFallido(evento domain.EventoFallido) 
 	return args.Error(0)
 }
 
+// Extensión de MockAuditRepository para soportar listado y actualización
+func (m *MockAuditRepository) ListarPendientes() ([]domain.EventoFallido, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.EventoFallido), args.Error(1)
+}
+
+func (m *MockAuditRepository) ActualizarEstado(id int, estado string, intentos int) error {
+	args := m.Called(id, estado, intentos)
+	return args.Error(0)
+}
 func TestTransferencia_FallaRabbitMQ_RegistraAuditoria(t *testing.T) {
 	// Arrange
 	publisherMock := new(MockEventPublisher)
@@ -42,10 +56,6 @@ func TestTransferencia_FallaRabbitMQ_RegistraAuditoria(t *testing.T) {
 
 	// Esperamos que, al fallar el publisher, se invoque el repositorio de auditoría exactamente una vez
 	auditRepoMock.On("GuardarEventoFallido", mock.AnythingOfType("domain.EventoFallido")).Return(nil)
-
-	// Act & Assert
-	// Nota: Si ya tienes los repositorios de cuenta y transacción mockeados en tu estructura de servicio,
-	// puedes inyectarlos aquí. Esta prueba valida específicamente la interacción del publisher y el auditor.
 
 	err := publisherMock.PublishTransferencia(domain.TransferenciaEvent{
 		ID:              "tx-test-123",
@@ -75,30 +85,26 @@ func TestTransferencia_FallaRabbitMQ_RegistraAuditoria(t *testing.T) {
 	auditRepoMock.AssertExpectations(t)
 }
 
-// Extensión de MockAuditRepository para soportar listado y actualización
-func (m *MockAuditRepository) ListarPendientes() ([]domain.EventoFallido, error) {
-	args := m.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]domain.EventoFallido), args.Error(1)
-}
-
-func (m *MockAuditRepository) ActualizarEstado(id int, estado string, intentos int) error {
-	args := m.Called(id, estado, intentos)
-	return args.Error(0)
-}
 func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
 	// Arrange
 	publisherMock := new(MockEventPublisher)
 	auditRepoMock := new(MockAuditRepository)
+
+	transferenciaEvt := domain.TransferenciaEvent{
+		ID:              "tx-test-reprocesar-1",
+		CuentaOrigenID:  "cta-origen",
+		CuentaDestinoID: "cta-destino",
+		Monto:           250.0,
+		Timestamp:       time.Now(),
+	}
+	payloadBytes, _ := json.Marshal(transferenciaEvt)
 
 	// Simulamos un evento pendiente registrado previamente en la auditoría
 	eventosPendientes := []domain.EventoFallido{
 		{
 			ID:            1,
 			TransaccionID: "tx-test-reprocesar-1",
-			Payload:       []byte(`{"id":"tx-test-reprocesar-1","monto":250.0}`),
+			Payload:       payloadBytes,
 			Estado:        "FALLIDO",
 			Intentos:      2,
 		},
@@ -113,6 +119,9 @@ func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
 	// 3. Esperamos que el estado del evento se actualice a "PROCESADO"
 	auditRepoMock.On("ActualizarEstado", 1, "PROCESADO", 2).Return(nil)
 
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	err := auditService.ReprocesarEventos()
 	// Act (Simulando la lógica del AuditService.ReprocesarEventos)
 	pendientes, err := auditRepoMock.ListarPendientes()
 	assert.NoError(t, err)
@@ -138,6 +147,58 @@ func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
 	}
 
 	// Assert: Verificamos que todos los mocks cumplieron sus expectativas
+	assert.Error(t, err)
+	publisherMock.AssertExpectations(t)
+	auditRepoMock.AssertExpectations(t)
+}
+
+func TestAuditService_ReprocesarEventos_FallaListarPendientes(t *testing.T) {
+	publisherMock := new(MockEventPublisher)
+	auditRepoMock := new(MockAuditRepository)
+
+	auditRepoMock.On("ListarPendientes").Return(nil, errors.New("error de conexion bd"))
+
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	err := auditService.ReprocesarEventos()
+
+	assert.Error(t, err)
+	auditRepoMock.AssertExpectations(t)
+	publisherMock.AssertNotCalled(t, "PublishTransferencia", mock.Anything)
+}
+
+func TestAuditService_ReprocesarEventos_FallaActualizarEstado(t *testing.T) {
+	publisherMock := new(MockEventPublisher)
+	auditRepoMock := new(MockAuditRepository)
+
+	transferenciaEvt := domain.TransferenciaEvent{
+		ID:              "tx-test-error-upd",
+		CuentaOrigenID:  "cta-origen",
+		CuentaDestinoID: "cta-destino",
+		Monto:           100.0,
+		Timestamp:       time.Now(),
+	}
+	payloadBytes, _ := json.Marshal(transferenciaEvt)
+
+	eventosPendientes := []domain.EventoFallido{
+		{
+			ID:            2,
+			TransaccionID: "tx-test-error-upd",
+			Payload:       payloadBytes,
+			Estado:        "FALLIDO",
+			Intentos:      1,
+		},
+	}
+
+	auditRepoMock.On("ListarPendientes").Return(eventosPendientes, nil)
+	publisherMock.On("PublishTransferencia", mock.AnythingOfType("domain.TransferenciaEvent")).Return(nil)
+	auditRepoMock.On("ActualizarEstado", 2, "PROCESADO", 1).Return(errors.New("error al actualizar estado en db"))
+
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	err := auditService.ReprocesarEventos()
+
+	assert.Error(t, err)
 	publisherMock.AssertExpectations(t)
 	auditRepoMock.AssertExpectations(t)
 }

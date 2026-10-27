@@ -120,7 +120,7 @@ func main() {
 	}
 
 	auditService := services.NewAuditService(auditRepo, eventPublisher)
-	auditService.IniciarWorkerReproceso(5 * time.Minute) // Se ejecuta cada 5 minutos
+	auditService.IniciarWorkerReproceso(5 * time.Minute) // Se ejecuta cada 5 minutos para reprocesar eventos fallidos
 
 	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
 	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)

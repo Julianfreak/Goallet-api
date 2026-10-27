@@ -15,6 +15,7 @@ import (
 	"goallet-api/internal/core/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 )
 
 // ==========================================================
@@ -32,6 +33,7 @@ type MockCuentaRepo struct {
 
 type MockAuditRepo struct {
 	forzarErrorGuardar error
+	mock.Mock
 }
 
 func (m *MockAuditRepo) GuardarEventoFallido(evento domain.EventoFallido) error {
@@ -115,6 +117,18 @@ func (m *MockTxRepo) Guardar(tx *domain.Transaccion) error {
 
 func (m *MockTxRepo) ListarPorCuentaID(id string) ([]domain.Transaccion, error) {
 	return nil, nil
+}
+func (m *MockAuditRepo) ListarPendientes() ([]domain.EventoFallido, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.EventoFallido), args.Error(1)
+}
+
+func (m *MockAuditRepo) ActualizarEstado(id int, estado string, intentos int) error {
+	args := m.Called(id, estado, intentos)
+	return args.Error(0)
 }
 
 // ==========================================================
