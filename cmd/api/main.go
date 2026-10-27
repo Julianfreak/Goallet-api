@@ -107,7 +107,8 @@ func main() {
 		log.Println("Conectado exitosamente a RabbitMQ")
 	}
 	// Inicializar Consumer de RabbitMQ
-	consumer, err := messaging.NewRabbitMQConsumer(rabbitURL)
+	auditRepo := storage.NewAuditRepositoryPostgres(dbPool)
+	consumer, err := messaging.NewRabbitMQConsumer(rabbitURL, auditRepo)
 	if err != nil {
 		slog.Error("No se pudo iniciar el consumidor de eventos", "error", err)
 	} else {
@@ -118,7 +119,8 @@ func main() {
 		}
 	}
 
-	auditRepo := storage.NewAuditRepositoryPostgres(dbPool)
+	auditService := services.NewAuditService(auditRepo, eventPublisher)
+	auditService.IniciarWorkerReproceso(5 * time.Minute) // Se ejecuta cada 5 minutos
 
 	// 4. Instanciamos ambos adaptadores de salida (Persistencia PostgreSQL)
 	cuentaRepo := storage.NewPostgresCuentaStorage(dbPool)

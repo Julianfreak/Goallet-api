@@ -39,3 +39,31 @@ func (r *AuditRepositoryPostgres) GuardarEventoFallido(evento domain.EventoFalli
 
 	return nil
 }
+
+func (r *AuditRepositoryPostgres) ListarPendientes() ([]domain.EventoFallido, error) {
+	query := `SELECT id, transaccion_id, payload, error_detalle, estado, intentos, created_at 
+              FROM eventos_auditoria 
+              WHERE estado IN ('FALLIDO', 'FALLIDO_MAX_REINTENTOS') 
+              ORDER BY created_at ASC LIMIT 50`
+	rows, err := r.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("error al listar eventos pendientes: %w", err)
+	}
+	defer rows.Close()
+
+	var eventos []domain.EventoFallido
+	for rows.Next() {
+		var evento domain.EventoFallido
+		if err := rows.Scan(&evento.ID, &evento.TransaccionID, &evento.Payload, &evento.ErrorDetalle, &evento.Estado, &evento.Intentos, &evento.CreatedAt); err != nil {
+			return nil, fmt.Errorf("error al escanear evento pendiente: %w", err)
+		}
+		eventos = append(eventos, evento)
+	}
+	return eventos, nil
+}
+
+func (r *AuditRepositoryPostgres) ActualizarEstado(id int, estado string, intentos int) error {
+	query := `UPDATE eventos_auditoria SET estado = $1, intentos = $2 WHERE id = $3`
+	_, err := r.db.Exec(context.Background(), query, estado, intentos, id)
+	return err
+}
