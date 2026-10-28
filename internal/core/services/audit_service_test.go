@@ -202,3 +202,21 @@ func TestAuditService_ReprocesarEventos_FallaActualizarEstado(t *testing.T) {
 	publisherMock.AssertExpectations(t)
 	auditRepoMock.AssertExpectations(t)
 }
+func TestAuditService_IniciarWorkerReproceso(t *testing.T) {
+	publisherMock := new(MockEventPublisher)
+	auditRepoMock := new(MockAuditRepository)
+
+	// Simulamos que el worker encuentra una lista vacía de pendientes
+	auditRepoMock.On("ListarPendientes").Return([]domain.EventoFallido{}, nil).Maybe()
+
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	// Iniciamos el worker con un intervalo muy corto (10ms)
+	auditService.IniciarWorkerReproceso(10 * time.Millisecond)
+
+	// Esperamos lo suficiente para que el ticker dispare al menos un ciclo
+	time.Sleep(30 * time.Millisecond)
+
+	// Verificamos que el worker ejecutó el ciclo llamando al repositorio
+	auditRepoMock.AssertCalled(t, "ListarPendientes")
+}
