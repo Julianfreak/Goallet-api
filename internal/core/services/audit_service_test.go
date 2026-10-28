@@ -249,3 +249,23 @@ func TestAuditService_ReprocesarEventos_JsonMalformado(t *testing.T) {
 	auditRepoMock.AssertExpectations(t)
 	publisherMock.AssertNotCalled(t, "PublishTransferencia", mock.Anything)
 }
+func TestAuditService_IniciarWorkerReproceso_ExitoYError(t *testing.T) {
+	publisherMock := new(MockEventPublisher)
+	auditRepoMock := new(MockAuditRepository)
+
+	// Simulamos que el primer llamado falla para cubrir el log de error del worker,
+	// y el segundo devuelve éxito con lista vacía.
+	auditRepoMock.On("ListarPendientes").Return(nil, errors.New("error simulado worker")).Once()
+	auditRepoMock.On("ListarPendientes").Return([]domain.EventoFallido{}, nil).Maybe()
+
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	// Iniciamos el worker con un intervalo muy corto (5ms) para forzar ejecuciones rápidas
+	auditService.IniciarWorkerReproceso(5 * time.Millisecond)
+
+	// Esperamos lo suficiente para que el ticker dispare un par de ciclos
+	time.Sleep(20 * time.Millisecond)
+
+	// Verificamos que el repositorio fue llamado por el worker
+	auditRepoMock.AssertCalled(t, "ListarPendientes")
+}
