@@ -202,21 +202,50 @@ func TestAuditService_ReprocesarEventos_FallaActualizarEstado(t *testing.T) {
 	publisherMock.AssertExpectations(t)
 	auditRepoMock.AssertExpectations(t)
 }
-func TestAuditService_IniciarWorkerReproceso(t *testing.T) {
+func TestAuditService_ReprocesarEventos_PayloadInvalido(t *testing.T) {
 	publisherMock := new(MockEventPublisher)
 	auditRepoMock := new(MockAuditRepository)
 
-	// Simulamos que el worker encuentra una lista vacía de pendientes
-	auditRepoMock.On("ListarPendientes").Return([]domain.EventoFallido{}, nil).Maybe()
+	eventosPendientes := []domain.EventoFallido{
+		{
+			ID:            3,
+			TransaccionID: "tx-test-invalid-payload",
+			Payload:       "esto-no-es-un-slice-de-bytes", // Fuerza el camino !ok -> continue
+			Estado:        "FALLIDO",
+			Intentos:      1,
+		},
+	}
 
+	auditRepoMock.On("ListarPendientes").Return(eventosPendientes, nil)
 	auditService := services.NewAuditService(auditRepoMock, publisherMock)
 
-	// Iniciamos el worker con un intervalo muy corto (10ms)
-	auditService.IniciarWorkerReproceso(10 * time.Millisecond)
+	err := auditService.ReprocesarEventos()
 
-	// Esperamos lo suficiente para que el ticker dispare al menos un ciclo
-	time.Sleep(30 * time.Millisecond)
+	assert.NoError(t, err)
+	auditRepoMock.AssertExpectations(t)
+	publisherMock.AssertNotCalled(t, "PublishTransferencia", mock.Anything)
+}
 
-	// Verificamos que el worker ejecutó el ciclo llamando al repositorio
-	auditRepoMock.AssertCalled(t, "ListarPendientes")
+func TestAuditService_ReprocesarEventos_JsonMalformado(t *testing.T) {
+	publisherMock := new(MockEventPublisher)
+	auditRepoMock := new(MockAuditRepository)
+
+	eventosPendientes := []domain.EventoFallido{
+		{
+			ID:            4,
+			TransaccionID: "tx-test-json-error",
+			Payload:       []byte(`{json-invalido-mal-formado}`), // Fuerza el error en json.Unmarshal -> continue
+			Estado:        "FALLIDO",
+			Intentos:      1,
+		},
+	}
+
+	auditRepoMock.On("ListarPendientes").Return(eventosPendientes, nil)
+	auditService := services.NewAuditService(auditRepoMock, publisherMock)
+
+	err := auditService.ReprocesarEventos()
+
+	assert.NoError(t, err)
+	auditRepoMock.AssertExpectations(t)
+	publisherMock.AssertNotCalled(t, "PublishTransferencia", mock.Anything)
 }
