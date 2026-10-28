@@ -86,7 +86,6 @@ func TestTransferencia_FallaRabbitMQ_RegistraAuditoria(t *testing.T) {
 }
 
 func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
-	// Arrange
 	publisherMock := new(MockEventPublisher)
 	auditRepoMock := new(MockAuditRepository)
 
@@ -99,7 +98,6 @@ func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
 	}
 	payloadBytes, _ := json.Marshal(transferenciaEvt)
 
-	// Simulamos un evento pendiente registrado previamente en la auditoría
 	eventosPendientes := []domain.EventoFallido{
 		{
 			ID:            1,
@@ -110,44 +108,17 @@ func TestAuditService_ReprocesarEventos_Exitoso(t *testing.T) {
 		},
 	}
 
-	// 1. Configuramos el repositorio para que devuelva el evento pendiente
 	auditRepoMock.On("ListarPendientes").Return(eventosPendientes, nil)
-
-	// 2. Configuramos el publicador para que ahora sí responda con éxito (RabbitMQ recuperado)
 	publisherMock.On("PublishTransferencia", mock.AnythingOfType("domain.TransferenciaEvent")).Return(nil)
-
-	// 3. Esperamos que el estado del evento se actualice a "PROCESADO"
 	auditRepoMock.On("ActualizarEstado", 1, "PROCESADO", 2).Return(nil)
 
 	auditService := services.NewAuditService(auditRepoMock, publisherMock)
 
 	err := auditService.ReprocesarEventos()
-	// Act (Simulando la lógica del AuditService.ReprocesarEventos)
-	pendientes, err := auditRepoMock.ListarPendientes()
+
+	// ¡Aquí debe ser NoError porque es el caso exitoso!
 	assert.NoError(t, err)
-	assert.Len(t, pendientes, 1)
 
-	for _, evento := range pendientes {
-		var transferenciaEvent domain.TransferenciaEvent
-
-		// Aserción de tipo para asegurar que es []byte
-		payloadBytes, ok := evento.Payload.([]byte)
-		assert.True(t, ok, "El payload debe ser un slice de bytes")
-
-		errUnmarshal := json.Unmarshal(payloadBytes, &transferenciaEvent)
-		assert.NoError(t, errUnmarshal)
-
-		// Intentamos publicar nuevamente
-		errPub := publisherMock.PublishTransferencia(transferenciaEvent)
-		if errPub == nil {
-			// Si publica con éxito, actualizamos el estado en la BD de auditoría
-			errUpd := auditRepoMock.ActualizarEstado(evento.ID, "PROCESADO", evento.Intentos)
-			assert.NoError(t, errUpd)
-		}
-	}
-
-	// Assert: Verificamos que todos los mocks cumplieron sus expectativas
-	assert.Error(t, err)
 	publisherMock.AssertExpectations(t)
 	auditRepoMock.AssertExpectations(t)
 }
