@@ -133,6 +133,7 @@ func main() {
 	// 5. Inyectamos el servicio en el Adaptador de entrada (Handler HTTP)
 	billeteraHandler := handlers.NewBilleteraHandler(billeteraService)
 	authHandler := handlers.NewAuthHandler()
+	healthHandler := handlers.NewHealthHandler(dbPool)
 
 	// 6. Inicializamos Gin sin el logger por defecto (usaremos slog en formato JSON)
 	router := gin.New()
@@ -141,6 +142,10 @@ func main() {
 
 	// --- RUTA INTERACTIVA SWAGGER UI ---
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// --- RUTA PÚBLICA DE HEALTH CHECK (para ALB de AWS ECS Fargate) ---
+	// Debe estar fuera del middleware de autenticación JWT y del rate limiter.
+	router.GET("/health", healthHandler.HealthCheck)
 
 	// 7. Mapeamos las rutas de la API REST
 	v1 := router.Group("/api/v1")

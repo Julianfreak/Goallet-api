@@ -31,7 +31,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retorna la lista de todos los movimientos y auditoría de una cuenta específica",
+                "description": "Retorna la lista paginada y filtrada por fecha del ledger de una cuenta",
                 "produces": [
                     "application/json"
                 ],
@@ -42,20 +42,42 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID de la Cuenta (UUID)",
+                        "description": "ID de la Cuenta",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Cantidad de registros por página (default 20)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Número de página (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Fecha inicial (YYYY-MM-DD o RFC3339)",
+                        "name": "fecha_inicio",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Fecha final (YYYY-MM-DD o RFC3339)",
+                        "name": "fecha_fin",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Movimiento"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -482,6 +504,32 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/health": {
+            "get": {
+                "description": "Verifica que la API esté operativa y, si hay pool de BD, que la conexión a PostgreSQL responda. Usado por el ALB de AWS ECS Fargate.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Comprobación de estado del servicio",
+                "responses": {
+                    "200": {
+                        "description": "Servicio operativo",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.HealthResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Base de datos no disponible",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.HealthResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -501,47 +549,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "domain.Movimiento": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "cuenta_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "monto": {
-                    "type": "number"
-                },
-                "saldo_anterior": {
-                    "type": "number"
-                },
-                "saldo_nuevo": {
-                    "type": "number"
-                },
-                "tipo": {
-                    "$ref": "#/definitions/domain.TipoMovimiento"
-                }
-            }
-        },
-        "domain.TipoMovimiento": {
-            "type": "string",
-            "enum": [
-                "DEPOSITO",
-                "RETIRO",
-                "TRANSFERENCIA_ENVIADA",
-                "TRANSFERENCIA_RECIBIDA"
-            ],
-            "x-enum-varnames": [
-                "TipoDeposito",
-                "TipoRetiro",
-                "TipoTransferenciaEnviada",
-                "TipoTransferenciaRecibida"
-            ]
         },
         "domain.TipoTransaccion": {
             "type": "string",
@@ -645,6 +652,27 @@ const docTemplate = `{
                 },
                 "monto": {
                     "type": "number"
+                }
+            }
+        },
+        "handlers.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string",
+                    "example": "connected"
+                },
+                "service": {
+                    "type": "string",
+                    "example": "goallet-api"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "UP"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2026-11-13T12:00:00Z"
                 }
             }
         }

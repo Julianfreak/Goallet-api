@@ -95,6 +95,34 @@ docker compose ps
 
 ---
 
+## Health Check (para AWS ECS Fargate)
+
+El proyecto incluye un endpoint público de comprobación de estado `GET /health` diseñado para ser consumido por el Application Load Balancer (ALB) de AWS ECS Fargate.
+
+### Comportamiento
+
+- **Liveness probe** (sin pool de BD): responde `200 OK` con `"status": "UP"` inmediatamente, sin verificar dependencias externas. Útil para confirmar que el contenedor está en ejecución.
+- **Readiness probe** (con pool de BD inyectado): realiza un `db.Ping(ctx)` con timeout de 2 segundos contra PostgreSQL. Si la BD responde → `200 OK` con `"database": "connected"`. Si falla → `503 Service Unavailable` con `"status": "DOWN"` y `"database": "disconnected"`.
+
+### Respuesta de ejemplo (200 OK)
+
+```json
+{
+  "status": "UP",
+  "service": "goallet-api",
+  "timestamp": "2026-11-13T12:00:00Z",
+  "database": "connected"
+}
+```
+
+### Características de seguridad
+
+- Ruta registrada en la raíz del router (`/health`), **fuera** del middleware de autenticación JWT y del rate limiter.
+- 100% público: el ALB necesita acceder sin tokens ni headers de autenticación.
+- El endpoint no expone información sensible (versiones, rutas internas, credenciales).
+
+---
+
 ## Documentación Interactiva (OpenAPI / Swagger)
 
 La API dispone de especificación OpenAPI 3.0 accesible desde la interfaz de Swagger UI cuando el servidor está en ejecución:
@@ -112,6 +140,7 @@ swag init -g cmd/api/main.go --parseDependency --parseInternal
 
 | Servicio | Puerto / Ruta | Descripción |
 | --- | --- | --- |
+| **Health Check** | `http://localhost:8080/health` | Comprobación de estado para ALB (liveness + readiness) |
 | **API REST (Gin)** | `http://localhost:8090/api/v1` | Endpoints de negocio (cuentas, transferencias, depósitos) |
 | **Base de Datos (Postgres)** | `localhost:5432` | Motor relacional con persistencia transaccional ACID |
 | **Métricas (Prometheus)** | `http://localhost:2112/metrics` | Endpoint de telemetría e inspección de Goroutines / Memoria |
@@ -150,6 +179,7 @@ go test -v -tags=integration ./internal/adapters/storage/...
 
 | Método | Endpoint | Acceso | Descripción |
 | --- | --- | --- | --- |
+| **GET** | `/health` | **Público** | Comprobación de estado del servicio (liveness/readiness para ALB) |
 | **POST** | `/api/v1/auth/token` | **Público** | Emite un token de acceso JWT válido por 24 horas |
 | **POST** | `/api/v1/cuentas` | **Protegido** | Crea una nueva cuenta bancaria |
 | **GET** | `/api/v1/cuentas` | **Protegido** | Lista todas las cuentas registradas |
@@ -178,3 +208,4 @@ go test -v -tags=integration ./internal/adapters/storage/...
 - [x] Fase 11: Autenticación y Seguridad con **JWT Middleware**.
 - [x] Fase 12: Arquitectura Dirigida por Eventos con **RabbitMQ** (Publicador y Worker Asíncrono).
 - [x] Fase 13: Estrategia de Fallback y Resiliencia con Tabla de Auditoría (`eventos_auditoria` en PostgreSQL).
+- [x] Fase 14: Endpoint de Health Check para AWS ECS Fargate (`GET /health` con liveness/readiness probe).

@@ -11,35 +11,6 @@ definitions:
       titular:
         type: string
     type: object
-  domain.Movimiento:
-    properties:
-      created_at:
-        type: string
-      cuenta_id:
-        type: string
-      id:
-        type: string
-      monto:
-        type: number
-      saldo_anterior:
-        type: number
-      saldo_nuevo:
-        type: number
-      tipo:
-        $ref: '#/definitions/domain.TipoMovimiento'
-    type: object
-  domain.TipoMovimiento:
-    enum:
-    - DEPOSITO
-    - RETIRO
-    - TRANSFERENCIA_ENVIADA
-    - TRANSFERENCIA_RECIBIDA
-    type: string
-    x-enum-varnames:
-    - TipoDeposito
-    - TipoRetiro
-    - TipoTransferenciaEnviada
-    - TipoTransferenciaRecibida
   domain.TipoTransaccion:
     enum:
     - DEPOSITO
@@ -110,6 +81,21 @@ definitions:
     - cuenta_destino_id
     - monto
     type: object
+  handlers.HealthResponse:
+    properties:
+      database:
+        example: connected
+        type: string
+      service:
+        example: goallet-api
+        type: string
+      status:
+        example: UP
+        type: string
+      timestamp:
+        example: "2026-11-13T12:00:00Z"
+        type: string
+    type: object
 host: localhost:8090
 info:
   contact:
@@ -127,13 +113,29 @@ info:
 paths:
   /api/v1/cuentas/{id}/movimientos:
     get:
-      description: Retorna la lista de todos los movimientos y auditoría de una cuenta
-        específica
+      description: Retorna la lista paginada y filtrada por fecha del ledger de una
+        cuenta
       parameters:
-      - description: ID de la Cuenta (UUID)
+      - description: ID de la Cuenta
         in: path
         name: id
         required: true
+        type: string
+      - description: Cantidad de registros por página (default 20)
+        in: query
+        name: limit
+        type: integer
+      - description: Número de página (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Fecha inicial (YYYY-MM-DD o RFC3339)
+        in: query
+        name: fecha_inicio
+        type: string
+      - description: Fecha final (YYYY-MM-DD o RFC3339)
+        in: query
+        name: fecha_fin
         type: string
       produces:
       - application/json
@@ -141,9 +143,8 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/domain.Movimiento'
-            type: array
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: Consultar historial de transacciones (Ledger)
@@ -421,6 +422,24 @@ paths:
       summary: Transferir fondos entre cuentas
       tags:
       - Transacciones
+  /health:
+    get:
+      description: Verifica que la API esté operativa y, si hay pool de BD, que la
+        conexión a PostgreSQL responda. Usado por el ALB de AWS ECS Fargate.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Servicio operativo
+          schema:
+            $ref: '#/definitions/handlers.HealthResponse'
+        "503":
+          description: Base de datos no disponible
+          schema:
+            $ref: '#/definitions/handlers.HealthResponse'
+      summary: Comprobación de estado del servicio
+      tags:
+      - Health
 securityDefinitions:
   BearerAuth:
     description: 'Escribe "Bearer " seguido de tu token JWT. Ejemplo: "Bearer eyJhbGciOi..."'
