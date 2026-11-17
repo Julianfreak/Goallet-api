@@ -13,7 +13,10 @@ import (
 
 	_ "goallet-api/docs"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -49,13 +52,12 @@ import (
 
 func main() {
 	fmt.Println("==========================================================")
-	fmt.Println("   Goallet API - Motor Transaccional de Billetera Digital  ")
+	fmt.Println("    Goallet API - Motor Transaccional de Billetera Digital  ")
 	fmt.Println("==========================================================")
 
 	ctx := context.Background()
 
 	// 1. Configuración de Logs JSON (slog) hacia la salida estándar (Stdout)
-
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
@@ -68,20 +70,46 @@ func main() {
 		}
 	}()
 
-	// 3. Configuración y Conexión al Pool de PostgreSQL (pgxpool)
+	// 3. Configuración y Conexión al Pool de PostgreSQL (pgxpool con AWS RDS IAM Auth)
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
-	dbUser := getEnv("DB_USER", "goallet_user")
-	dbPassword := getEnv("DB_PASSWORD", "goallet_password")
+	dbUser := getEnv("DB_USER", "postgres")
 	dbName := getEnv("DB_NAME", "goallet_db")
-	dbSSLMode := getEnv("DB_SSLMODE", "disable")
+	dbSSLMode := getEnv("DB_SSLMODE", "require")
+	awsRegion := getEnv("AWS_REGION", "us-east-2")
 
 	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode,
+		"postgres://%s@%s:%s/%s?sslmode=%s",
+		dbUser, dbHost, dbPort, dbName, dbSSLMode,
 	)
 
-	dbPool, err := pgxpool.New(ctx, dsn)
+	// Parsear la configuración base de pgxpool
+	cfg, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		slog.Error("Error al parsear la configuración de pgxpool", "error", err)
+		os.Exit(1)
+	}
+
+	// Cargar configuración de AWS para inyectar autenticación IAM dinámica
+	awsCfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(awsRegion))
+	if err != nil {
+		slog.Error("No se pudo cargar la configuración de AWS para IAM Auth", "error", err)
+		os.Exit(1)
+	}
+
+	endpoint := fmt.Sprintf("%s:%s", dbHost, dbPort)
+
+	// BeforeConnect intercepta cada intento de conexión y configura el token IAM en el ConnConfig
+	cfg.BeforeConnect = func(ctx context.Context, cc *pgx.ConnConfig) error {
+		token, tokenErr := auth.BuildAuthToken(ctx, endpoint, awsRegion, dbUser, awsCfg.Credentials)
+		if tokenErr != nil {
+			return fmt.Errorf("fallo al generar token IAM de RDS: %w", tokenErr)
+		}
+		cc.Password = token
+		return nil
+	}
+
+	dbPool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		slog.Error("Error crítico al crear el pool de conexiones a PostgreSQL", "error", err)
 		os.Exit(1)
@@ -92,7 +120,7 @@ func main() {
 		slog.Error("No se pudo establecer conexión con PostgreSQL (Ping fallido)", "error", err)
 		os.Exit(1)
 	}
-	slog.Info("Conexión exitosa y verificada con PostgreSQL (pgxpool)")
+	slog.Info("Conexión exitosa y verificada con PostgreSQL (pgxpool con RDS IAM Auth)")
 
 	rabbitURL := os.Getenv("RABBITMQ_URL")
 	if rabbitURL == "" {
