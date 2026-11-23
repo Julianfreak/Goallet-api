@@ -1,0 +1,1 @@
+dbConfig, err := pgxpool.ParseConfig("user=goallet_user dbname=goallet_db host=goallet-db1-instance-1.c1cki0c80deq.us-east-2.rds.amazonaws.com port=5432 sslmode=require password=your_password_here")
