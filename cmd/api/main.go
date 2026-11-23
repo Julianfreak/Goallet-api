@@ -103,8 +103,20 @@ func main() {
 	cfg.BeforeConnect = func(ctx context.Context, cc *pgx.ConnConfig) error {
 		token, tokenErr := auth.BuildAuthToken(ctx, endpoint, awsRegion, dbUser, awsCfg.Credentials)
 		if tokenErr != nil {
+			slog.Error("Fallo al generar token IAM de RDS", "error", tokenErr)
 			return fmt.Errorf("fallo al generar token IAM de RDS: %w", tokenErr)
 		}
+		prefix := token
+		if len(prefix) > 45 {
+			prefix = prefix[:45]
+		}
+		slog.Info("Token IAM generado en BeforeConnect",
+			"endpoint", endpoint,
+			"region", awsRegion,
+			"user", dbUser,
+			"token_len", len(token),
+			"token_prefix", prefix,
+		)
 		cc.Password = token
 		return nil
 	}
