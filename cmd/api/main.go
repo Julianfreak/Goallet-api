@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -106,16 +107,14 @@ func main() {
 			slog.Error("Fallo al generar token IAM de RDS", "error", tokenErr)
 			return fmt.Errorf("fallo al generar token IAM de RDS: %w", tokenErr)
 		}
-		prefix := token
-		if len(prefix) > 45 {
-			prefix = prefix[:45]
-		}
-		slog.Info("Token IAM generado en BeforeConnect",
-			"endpoint", endpoint,
-			"region", awsRegion,
-			"user", dbUser,
+		slog.Info("Debug token IAM",
+			"endpoint_quoted", fmt.Sprintf("%q", endpoint),
+			"user_quoted", fmt.Sprintf("%q", dbUser),
+			"region_quoted", fmt.Sprintf("%q", awsRegion),
 			"token_len", len(token),
-			"token_prefix", prefix,
+			"has_security_token", strings.Contains(token, "X-Amz-Security-Token="),
+			"cc_user_quoted", fmt.Sprintf("%q", cc.User),
+			"cc_host_quoted", fmt.Sprintf("%q", cc.Host),
 		)
 		cc.Password = token
 		return nil
