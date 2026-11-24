@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -107,15 +108,27 @@ func main() {
 			slog.Error("Fallo al generar token IAM de RDS", "error", tokenErr)
 			return fmt.Errorf("fallo al generar token IAM de RDS: %w", tokenErr)
 		}
+
+		parsedURL, parseErr := url.Parse("https://" + token)
+		var xAmzCred, xAmzDate string
+		if parseErr == nil {
+			q := parsedURL.Query()
+			xAmzCred = q.Get("X-Amz-Credential")
+			xAmzDate = q.Get("X-Amz-Date")
+		}
+
 		slog.Info("Debug token IAM",
 			"endpoint_quoted", fmt.Sprintf("%q", endpoint),
 			"user_quoted", fmt.Sprintf("%q", dbUser),
 			"region_quoted", fmt.Sprintf("%q", awsRegion),
 			"token_len", len(token),
 			"has_security_token", strings.Contains(token, "X-Amz-Security-Token="),
+			"x_amz_credential", xAmzCred,
+			"x_amz_date", xAmzDate,
 			"cc_user_quoted", fmt.Sprintf("%q", cc.User),
 			"cc_host_quoted", fmt.Sprintf("%q", cc.Host),
 		)
+
 		cc.Password = token
 		return nil
 	}
